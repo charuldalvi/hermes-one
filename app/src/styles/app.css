@@ -421,3 +421,25 @@ html[data-platform="win32"] .app .rp .hdr { padding-right: var(--caption-pad); }
 .sys-two { display: grid; grid-template-columns: minmax(0, 1fr) 140px; gap: 12px; }
 .sys-alt { justify-self: start; display: inline-flex; align-items: center; gap: 7px; }
 .sys-err { margin: 0; font-size: var(--text-base); color: var(--status-error); line-height: 1.45; }
+
+/* ---------- chats side by side ---------- */
+/* Most of the time one chat fills the middle. Beside others, each gets an equal column; the one in focus (the
+   chat you type to) has a blue line on top, and the others fold their typing box down to one line. */
+.panes { flex: 1; min-width: 420px; display: flex; position: relative; }
+.panes > .chat { flex: 1 1 0; min-width: 0; }
+.panes.many > .chat + .chat { box-shadow: inset 1px 0 0 var(--border-divider); }
+.panes.many > .chat.on::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--blue-500); z-index: 3; pointer-events: none; }
+.panes.many > .chat:not(.on) .hdr .crumb .cur { color: var(--text-secondary); }
+.panes.many .cscroll { padding: 28px 28px 16px; }
+.panes.many .composer { padding: 0 calc(20px + var(--sbw, 0px)) 18px 20px; }
+.panes.many .cmp { transition: background-color .2s; }
+.panes.many .cmp .strip { transition: height .34s cubic-bezier(.2, .9, .3, 1.05), opacity .2s; overflow: hidden; }
+.panes.many > .chat:not(.on) .cmp { background: transparent; }
+.panes.many > .chat:not(.on) .cmp .strip { height: 0; opacity: 0; }
+.panes.many > .chat:not(.on) .field .tools { display: none; }
+/* Where a chat dragged from the sidebar will land. */
+.pdrop { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--blue-500); border-radius: 1px; z-index: 5; pointer-events: none; }
+/* A sidebar row whose chat is open beside the one in focus. */
+.row.in { color: var(--text-primary); }
+.chiefhero.in { background: var(--bg-raised); }
+.panes.many > .chat:not(.on) .composer .hint { display: none; }

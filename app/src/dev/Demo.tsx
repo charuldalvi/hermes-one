@@ -45,7 +45,7 @@ export async function startDemo(scene: 'chat' | 'browser' | 'terminal') {
   gateway.close() // nothing real comes in from here on
   window.dispatchEvent(new CustomEvent('hermes:close-panel'))
   if (scene === 'chat') {
-    setState({ connection: 'open', view: 'chat', chatWith: 'default', groupOpen: null, needs: [], bots: team({ researcher: 72_000, writer: 41_000 }) })
+    setState({ connection: 'open', view: 'chat', chatWith: 'default', panes: ['default'], groupOpen: null, needs: [], bots: team({ researcher: 72_000, writer: 41_000 }) })
     setState((s) => ({ chief: { ...s.chief, loading: false, busy: true, turnStartedAt: now() - 12_000, step: 'Asking Writer', messages: [
       say('u1', 'user', 'Plan the launch of our new podcast: a landing page, three social posts and a short trailer script. Keep it friendly.', 9 * min),
       say('a1', 'assistant', "On it. I've split it up so it happens at once:\n\n- **Researcher** is checking what similar shows did for their launch.\n- **Writer** is drafting the three posts and the trailer script.\n- **Designer** makes the cover art once the posts are in.\n\nI'll bring it all back here as one plan.", 8 * min,
@@ -58,7 +58,7 @@ export async function startDemo(scene: 'chat' | 'browser' | 'terminal') {
     return
   }
   if (scene === 'browser') {
-    setState({ connection: 'open', view: 'chat', chatWith: 'researcher', groupOpen: null, needs: [], bots: team({ researcher: 64_000 }) })
+    setState({ connection: 'open', view: 'chat', chatWith: 'researcher', panes: ['researcher'], groupOpen: null, needs: [], bots: team({ researcher: 64_000 }) })
     updateChat('researcher', { loading: false, busy: true, turnStartedAt: now() - 64_000, step: 'Using the browser', sessionId: 'demo', messages: [
       say('r1', 'user', 'What makes a podcast launch go well? Look at a few sources and give me the three things that matter most.', 2 * min),
       say('r2', 'assistant', "Starting with the basics of how podcasts reach listeners, then comparable launches. I'll mark anything I couldn't confirm.", 1.1 * min),
@@ -68,7 +68,7 @@ export async function startDemo(scene: 'chat' | 'browser' | 'terminal') {
     return
   }
   // terminal
-  setState({ connection: 'open', view: 'chat', chatWith: 'coder', groupOpen: null, needs: [], bots: team({ coder: 104_000 }) })
+  setState({ connection: 'open', view: 'chat', chatWith: 'coder', panes: ['coder'], groupOpen: null, needs: [], bots: team({ coder: 104_000 }) })
   updateChat('coder', { loading: false, busy: true, turnStartedAt: now() - 104_000, step: 'Running a command', sessionId: 'demo', messages: [
     say('c1', 'user', 'Add a dark mode toggle to the landing page header, and make sure the tests still pass.', 2.5 * min),
     say('c2', 'assistant', "I'll hand the change to Claude Code in the site's folder and run the tests after. You can watch it on the right.", 1.9 * min),

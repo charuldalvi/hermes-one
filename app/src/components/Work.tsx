@@ -14,7 +14,7 @@ import { getGroups } from '../lib/groups'
 import { prettyName, sessionProfile, toast } from '../lib/hermes'
 import { Icon } from '../lib/icons'
 import { elapsed } from '../lib/markdown'
-import { chatOf, getState, setState, useStore } from '../lib/store'
+import { chatOf, focusKeyOf, getState, setState, useStore } from '../lib/store'
 import { currentSystem } from '../lib/systems'
 import { IS_WIN } from '../lib/platform'
 import { backfill, closeTerm, onOutput, onTermStart, outputOf, stopTerm, useTerms, type Term } from '../lib/terminals'
@@ -58,14 +58,15 @@ export function noteWorkClosed(key: string | null) {
 }
 function autoOpen(kind: WorkKind, profile: string) {
   const s = getState()
-  // Only for the chat you're looking at: the agent's own, or a group it's in.
-  const group = s.groupOpen ? getGroups().rooms.find((r) => r.room_id === s.groupOpen) : null
-  if (s.view !== 'chat' || (group ? !group.members.some((m) => m.profile === profile) : s.chatWith !== profile)) return
+  // Only for a chat on screen: the agent's own, or a group it's in.
+  const shows = (k: string) => k === profile || (k.startsWith('group:') && !!getGroups().rooms.find((r) => r.room_id === k.slice(6))?.members.some((m) => m.profile === profile))
+  if (s.view !== 'chat' || !s.panes.some(shows)) return
   const turn = chatOf(s, profile).turnStartedAt ?? 0
   const closedAt = dismissed.get(profile)
   if (closedAt && closedAt >= turn) return
   if (s.panel && !isWorkKey(s.panel)) return // the agent's work or a group is open: leave it
   if (isWorkKey(s.panel) && parseWorkKey(s.panel).profile === profile) return // already showing this agent
+  if (isWorkKey(s.panel) && !shows(focusKeyOf(s))) return // another agent's work shows: only the chat in focus takes it
   openWork(kind, profile)
 }
 let autoStarted = false

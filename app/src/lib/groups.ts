@@ -6,7 +6,7 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { gateway } from './gateway'
 import { prettyName, toast } from './hermes'
-import { getState, setState as setMain, type Bot } from './store'
+import { getState, placeFocus, setState as setMain, type Bot } from './store'
 
 // ---------- wire shapes (tui_gateway/contracts/groups_bot_relay.py) ----------
 
@@ -518,7 +518,7 @@ export async function downloadAttachment(roomId: string, eventId: string, a: Roo
 export function openGroup(roomId: string, _from?: Element | null) {
   const panel = getState().panel
   if (panel && !/^(browser|screen|term):/.test(panel)) window.dispatchEvent(new CustomEvent('hermes:close-panel'))
-  setMain({ view: 'chat', groupOpen: roomId })
+  setMain((s) => ({ ...placeFocus(s, `group:${roomId}`), view: 'chat' }))
 }
 
 // ---------- reading a room: who's doing what (pure; the sidebar, header, members and log agree) ----------

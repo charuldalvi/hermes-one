@@ -9,7 +9,7 @@ import { isInternalNote } from './markdown'
 import { assignLooks } from './looks'
 import { recordTalk } from './feed'
 import { getPrefs } from './prefs'
-import { chatOf, getState, setState, updateBot, updateChat, type Bot, type Msg, type Need, type ToolCall } from './store'
+import { chatOf, getState, placeFocus, setState, updateBot, updateChat, type Bot, type Msg, type Need, type ToolCall } from './store'
 
 const CANONICAL_TITLE = 'Bot Chat'
 const uuid = () => crypto.randomUUID()
@@ -66,7 +66,7 @@ async function boot() {
     await attachBots()
     // A reconnect gives every session a new runtime id: agent chats are read again when shown.
     setState({ chats: {} })
-    if (!isChief(active())) void loadChat(active())
+    for (const p of new Set([...getState().panes, active()])) if (!p.startsWith('group:') && !isChief(p)) void loadChat(p)
     await refreshActivity()
     console.log('[hermes] ready:', getState().bots.length, 'agents,', getState().chief.messages.length, 'chat items,', getState().needs.length, 'needs')
   } catch (error: any) {
@@ -109,8 +109,16 @@ async function loadProfiles() {
   // Every agent its own bead (shape, colour, pose), before any bead is drawn.
   assignLooks(bots.filter((b) => !b.isChief).map((b) => b.profile))
   setState({ bots })
-  // The agent whose chat was open was removed: back to Chief.
-  if (!isChief(active()) && !bots.some((b) => b.profile === active())) setState({ chatWith: 'default' })
+  // An agent whose chat was open was removed: its pane closes, and the focus goes back to Chief.
+  const alive = (k: string) => k.startsWith('group:') || isChief(k) || bots.some((b) => b.profile === k)
+  setState((s) => {
+    const left = s.panes.filter(alive)
+    const panes = left.length ? left : ['default']
+    if (alive(s.chatWith)) return { panes }
+    if (s.groupOpen) return { panes, chatWith: 'default' }
+    const first = panes[0]
+    return first.startsWith('group:') ? { panes, chatWith: 'default', groupOpen: first.slice(6) } : { panes, chatWith: first }
+  })
 }
 
 /** After the team changes (a bot added, renamed or removed): read the profiles again and attach new bots. */
@@ -158,7 +166,7 @@ export function openChat(profile: string) {
   const work = panel?.match(/^(browser|screen|term):/)?.[1]
   if (work) { if (panel !== `${work}:${profile}`) window.dispatchEvent(new CustomEvent('hermes:open-panel', { detail: { profile: `${work}:${profile}` } })) }
   else window.dispatchEvent(new CustomEvent('hermes:close-panel'))
-  setState({ chatWith: profile, view: 'chat', groupOpen: null })
+  setState((s) => ({ ...placeFocus(s, profile), view: 'chat' }))
   if (isChief(profile)) return
   const cur = getState().chats[profile]
   if (!cur || (!cur.loading && !cur.sessionId)) void loadChat(profile)
@@ -623,7 +631,7 @@ export async function answerQuestion(need: Need, answer: string) {
 /** Opens the chat with a starter message in the box (not sent), e.g. "Use Blender to " after an install. */
 export function askChief(draft: string) {
   window.dispatchEvent(new CustomEvent('hermes:close-panel'))
-  setState({ view: 'chat', chatWith: 'default' })
+  setState((s) => ({ ...placeFocus(s, 'default'), view: 'chat' })) // the lead's chat takes focus (where it's open, or in the chat in focus)
   setTimeout(() => window.dispatchEvent(new CustomEvent('hermes:prefill', { detail: draft })), 80)
 }
 

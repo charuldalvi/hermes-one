@@ -1,6 +1,6 @@
 // The app's state: Chief's chat, a chat with each agent you open, the agents, and everything that needs
 // you. A tiny external store (subscribe + snapshot) that React reads through useSyncExternalStore.
-import { useSyncExternalStore } from 'react'
+import { createContext, useContext, useSyncExternalStore } from 'react'
 
 export type BotStatus = 'free' | 'working' | 'needs' | 'asleep' | 'error'
 
@@ -105,8 +105,11 @@ export interface State {
   chief: ChatState
   /** Each agent's own chat ("Bot Chat"), loaded when you open it. Chief's is `chief`. */
   chats: Record<string, ChatState>
-  /** Whose chat is in the middle: 'default' is Chief. */
+  /** Whose chat is in focus in the middle: 'default' is Chief. */
   chatWith: string
+  /** The chats side by side in the middle, left to right: an agent's profile ('default' is Chief) or
+   *  'group:<room id>'. The one in focus is groupOpen's group, else chatWith's chat. */
+  panes: string[]
   needs: Need[]
   panel: string | null // a bot profile, 'browser:' / 'screen:' / 'term:<profile>', '__needs', or null
   /** A group chat open in the middle (instead of an agent's chat): its room id. */
@@ -135,6 +138,7 @@ let state: State = {
   chief: { messages: [], loading: true, hasOlder: false, busy: false },
   chats: {},
   chatWith: 'default',
+  panes: ['default'],
   needs: [],
   panel: null,
   groupOpen: null,
@@ -171,10 +175,29 @@ export function updateChat(profile: string, patch: Partial<ChatState> | ((c: Cha
   if (profile === 'default') { updateChief(patch); return }
   setState((s) => { const cur = s.chats[profile] ?? EMPTY_CHAT; return { chats: { ...s.chats, [profile]: { ...cur, ...(typeof patch === 'function' ? patch(cur) : patch) } } } })
 }
-/** The chat in the middle of the window, and whose it is. */
+/** Which chat in the middle has focus: its pane key (an agent's profile, or 'group:<room id>'). */
+export const focusKeyOf = (s: State) => (s.groupOpen ? `group:${s.groupOpen}` : s.chatWith)
+/** Put `key` in focus: the pane already showing it, or else it takes the focused pane's place. */
+export function placeFocus(s: State, key: string): Partial<State> {
+  const cur = focusKeyOf(s)
+  let panes = s.panes.length ? s.panes : [cur]
+  if (!panes.includes(key)) {
+    const i = panes.indexOf(cur)
+    panes = panes.map((k, j) => (j === (i >= 0 ? i : panes.length - 1) ? key : k))
+  }
+  return key.startsWith('group:') ? { panes, groupOpen: key.slice(6) } : { panes, chatWith: key, groupOpen: null }
+}
+/** The agent whose chat a component belongs to, when chats sit side by side (unset: the chat in focus). */
+export const PaneProfile = createContext<string | null>(null)
+export function usePaneProfile(): string {
+  const pane = useContext(PaneProfile)
+  const focused = useStore((s) => s.chatWith)
+  return pane ?? focused
+}
+/** The chat this component belongs to (its pane's, else the one in focus), and whose it is. */
 export function useChat(): { profile: string; chat: ChatState } {
-  const profile = useStore((s) => s.chatWith)
-  const chat = useStore((s) => chatOf(s, s.chatWith))
+  const profile = usePaneProfile()
+  const chat = useStore((s) => chatOf(s, profile))
   return { profile, chat }
 }
 export function updateBot(profile: string, patch: Partial<Bot>) {

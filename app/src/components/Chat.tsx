@@ -8,7 +8,7 @@ import { rest } from '../lib/api'
 import { baseName, elapsed, renderMarkdown, splitMedia } from '../lib/markdown'
 import { Icon } from '../lib/icons'
 import { botMood, chatMood } from '../lib/moods'
-import { chatOf, getState, useChat, useStore, type Bot, type ChatState, type Msg, type Need } from '../lib/store'
+import { chatOf, getState, useChat, usePaneProfile, useStore, type Bot, type ChatState, type Msg, type Need } from '../lib/store'
 import { BotFace } from './BotFace'
 import { NeedCard } from './NeedCard'
 import { AppCard } from './apps/AppCard'
@@ -56,6 +56,7 @@ function Files({ files }: { files: string[] }) {
 /** Under a finished reply: copy it, or hear it in Hermes' voice (its own text-to-speech). */
 let playing: { audio: HTMLAudioElement; url: string; id: string } | null = null
 function TurnActions({ id, text, last }: { id: string; text: string; last?: boolean }) {
+  const profile = usePaneProfile()
   const [copied, setCopied] = useState(false)
   const [voice, setVoice] = useState<'idle' | 'loading' | 'playing'>('idle')
   const speak = async () => {
@@ -78,7 +79,7 @@ function TurnActions({ id, text, last }: { id: string; text: string; last?: bool
     <div className="tacts">
       <button title="Copy" onClick={() => { void navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1400) }}><Icon name={copied ? 'check' : 'copy'} size={14} /></button>
       <button title={voice === 'playing' ? 'Stop' : 'Read aloud'} onClick={() => void speak()}>{voice === 'loading' ? <span className="spin" style={{ width: 12, height: 12 }} /> : <Icon name={voice === 'playing' ? 'stop' : 'volume'} size={14} />}</button>
-      {last ? <button title="Try again (a new answer to the same message)" onClick={() => void runCommand('/retry')}><Icon name="refresh" size={14} /></button> : null}
+      {last ? <button title="Try again (a new answer to the same message)" onClick={() => void runCommand('/retry', profile)}><Icon name="refresh" size={14} /></button> : null}
     </div>
   )
 }
@@ -240,7 +241,7 @@ export function Chat() {
   useEffect(() => {
     const jump = (e: Event) => {
       const id = String((e as CustomEvent).detail)
-      const all = chatOf(getState(), getState().chatWith).messages
+      const all = chatOf(getState(), profile).messages
       const idx = all.findIndex((m) => m.id === id)
       if (idx < 0) return
       const need = all.length - idx
@@ -256,7 +257,7 @@ export function Chat() {
     }
     window.addEventListener('hermes:jump', jump)
     return () => window.removeEventListener('hermes:jump', jump)
-  }, [shown])
+  }, [shown, profile])
 
   if (chief.loading) return <div className="cscroll" ref={scroller}><div className="ccol" /></div>
 
@@ -295,7 +296,7 @@ export function Chat() {
               {showDay ? <div className="day">{day}</div> : null}
               <span className="anchor" data-mid={m.id} />
               {m.role === 'user' && m.from && !isChiefChat ? <FromCard m={m} bots={bots} />
-                : m.role === 'user' ? <div className={`you${m.id === lastUserId && !chief.busy ? ' last' : ''}`}>{m.id === lastUserId && !chief.busy ? <button className="youedit" title="Edit and send again" onClick={() => { void runCommand('/undo'); window.dispatchEvent(new CustomEvent('hermes:prefill', { detail: m.text })) }}><Icon name="edit" size={13} /></button> : null}{m.images?.length ? <div className="imgs">{m.images.map((n, i) => <span className="res" key={n + i}><Icon name={/\.(png|jpe?g|gif|webp|heic)$/i.test(n) || n === 'Picture' ? 'image' : 'file'} size={14} />{n}</span>)}</div> : null}{m.text}</div>
+                : m.role === 'user' ? <div className={`you${m.id === lastUserId && !chief.busy ? ' last' : ''}`}>{m.id === lastUserId && !chief.busy ? <button className="youedit" title="Edit and send again" onClick={() => { void runCommand('/undo', profile); window.dispatchEvent(new CustomEvent('hermes:prefill', { detail: m.text })) }}><Icon name="edit" size={13} /></button> : null}{m.images?.length ? <div className="imgs">{m.images.map((n, i) => <span className="res" key={n + i}><Icon name={/\.(png|jpe?g|gif|webp|heic)$/i.test(n) || n === 'Picture' ? 'image' : 'file'} size={14} />{n}</span>)}</div> : null}{m.text}</div>
                 : m.role === 'command' ? <CommandCard m={m} />
                 : m.role === 'assistant' ? <Turn m={m} bots={bots} needs={needs} live={false} step={chief.step} last={m.id === lastAssistantId && !chief.busy} profile={profile} chat={chief} name={name} />
                 : <Reply m={m} bots={bots} needs={needs} />}

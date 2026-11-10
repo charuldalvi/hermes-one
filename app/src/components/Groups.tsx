@@ -16,9 +16,10 @@ import { toast, toolLabel } from '../lib/hermes'
 import { Icon } from '../lib/icons'
 import { lookOf } from '../lib/looks'
 import { renderMarkdown } from '../lib/markdown'
-import { useStore, type Bot } from '../lib/store'
+import { getState, useStore, type Bot } from '../lib/store'
+import { chatRowProps, focusPane } from '../lib/panes'
 import { BotFace, type Mood } from './BotFace'
-import { toggleWork } from './Work'
+import { parseWorkKey, toggleWork } from './Work'
 import { confirm, Dialog, Empty, ErrorLine, Spinner, Tabs } from './ui'
 import '../styles/groups.css'
 
@@ -97,15 +98,15 @@ function GroupMark({ view, count }: { view: RoomView | undefined; count: number 
   return <span className="gcount" title={`${count} agents`}>{count}</span>
 }
 
-function GroupRow({ room, on }: { room: Room; on: boolean }) {
+function GroupRow({ room, on, beside }: { room: Room; on: boolean; beside?: boolean }) {
   const view = useRoomView(room.room_id)
   const moods = useMemo(() => moodsFor(view, 26), [view])
   const s = roomSummary(view)
   const who = room.members.map(memberName).join(', ')
   return (
-    <button className={`row bot grow${on ? ' on' : ''}`} data-sel={`bot:group:${room.room_id}`}
-      title={s.needs ? `${room.name} needs you` : `${room.name} · ${who}`}
-      onClick={(e) => openGroup(room.room_id, e.currentTarget.querySelector('.face'))}>
+    <button className={`row bot grow${on ? ' on' : beside ? ' in' : ''}`} data-sel={`bot:group:${room.room_id}`}
+      title={`${s.needs ? `${room.name} needs you` : `${room.name} · ${who}`}\n⌘-click or drag to open beside the other chats`}
+      {...chatRowProps(`group:${room.room_id}`, () => openGroup(room.room_id))}>
       <FaceStack members={room.members} size={26} max={3} moods={moods} />
       <span className="nm">{room.name}</span>
       <GroupMark view={view} count={room.members.length} />
@@ -120,6 +121,7 @@ export function GroupsSection() {
   const phase = useGroups((s) => s.phase)
   const error = useGroups((s) => s.error)
   const openRoom = useStore((s) => (s.view === 'chat' ? s.groupOpen : null))
+  const besides = useStore((s) => (s.view === 'chat' && s.panes.length > 1 ? s.panes.join('|') : ''))
   const connection = useStore((s) => s.connection)
   const [creating, setCreating] = useState(false)
   const bots = useStore((s) => s.bots.filter((b) => !b.isChief).length)
@@ -131,7 +133,7 @@ export function GroupsSection() {
             <Icon name="spark" size={12} />Let Hermes arrange</button>
           <button className="garr gadd" disabled={connection !== 'open'} title="New group" aria-label="New group" onClick={() => setCreating(true)}><Icon name="plus" size={13} /></button>
         </span></div>
-      {rooms.map((r) => <GroupRow key={r.room_id} room={r} on={openRoom === r.room_id} />)}
+      {rooms.map((r) => <GroupRow key={r.room_id} room={r} on={openRoom === r.room_id} beside={besides.split('|').includes(`group:${r.room_id}`)} />)}
       {phase === 'error' && !rooms.length ? <div className="lab gnote-side" title={error}>Groups couldn’t load. Retrying…</div> : null}
       {!rooms.length && phase !== 'error' ? <button className="row gnew" disabled={connection !== 'open'} onClick={() => setCreating(true)}><span className="gplus"><Icon name="plus" size={13} /></span><span className="nm">New group</span></button> : null}
       <NewGroupDialog open={creating} onClose={() => setCreating(false)} />
@@ -499,7 +501,8 @@ export function GroupPanel({ roomId, onClose }: { roomId: string; onClose: () =>
 }
 
 function RoomPanel({ roomId, onClose }: { roomId: string; onClose: () => void }) {
-  const workOpen = useStore((s) => /^(browser|screen|term):/.test(s.panel ?? ''))
+  // Whose browser, terminal or screen the side panel shows, if any.
+  const workAgent = useStore((s) => (/^(browser|screen|term):/.test(s.panel ?? '') ? parseWorkKey(s.panel!).profile : null))
   useWatchRoom(roomId)
   const view = useRoomView(roomId)
   const listed = useRoom(roomId)
@@ -532,6 +535,20 @@ function RoomPanel({ roomId, onClose }: { roomId: string; onClose: () => void })
     onReply: (m, text, thread) => setReply({ member: m, quote: text.split('\n').map((l) => l.trim()).find(Boolean)?.replace(/[#*_`>]/g, '') ?? '', thread }),
   }
 
+  // Beside other chats, the group closes like any of them.
+  const beside = useStore((st) => st.view === 'chat' && st.panes.length > 1 && st.panes.includes(`group:${roomId}`))
+  // The side panel belongs to the chat in focus: this button focuses the group, then shows its lead's browser and
+  // terminal (or hides them when they're one of its members').
+  const workHere = !!workAgent && members.some((m) => m.profile === workAgent)
+  const onWork = () => {
+    if (workHere) { window.dispatchEvent(new CustomEvent('hermes:close-panel')); return }
+    focusPane(`group:${roomId}`)
+    const who = (lead ? byId.get(lead)?.profile : undefined) ?? members.find((m) => m.profile)?.profile
+    if (!who) return
+    const kind = getState().panel?.match(/^(browser|screen|term):/)?.[1]
+    if (kind) window.dispatchEvent(new CustomEvent('hermes:open-panel', { detail: { profile: `${kind}:${who}` } }))
+    else toggleWork(who)
+  }
   const head = (
     <div className="hdr drag">
       <span className="crumb"><Icon name="group" /><span>Groups</span><span className="sl">/</span>
@@ -540,8 +557,8 @@ function RoomPanel({ roomId, onClose }: { roomId: string; onClose: () => void })
       <span className="sp" />
       {room && !view?.gone ? <button className="hbtn nodrag" title="Group settings" onClick={() => setSettings(true)}><Icon name="sliders" /></button> : null}
       {/* The side panel shows the group's agents at work: its lead's (or first member's) browser and terminal first. */}
-      <button className={`hbtn nodrag${workOpen ? ' on' : ''}`} title={workOpen ? 'Hide the browser and terminal' : 'Show the agents’ browser and terminal beside the chat'}
-        onClick={() => toggleWork(lead ? byId.get(lead)?.profile ?? members[0]?.profile : members[0]?.profile)}><Icon name="screen" /></button>
+      <button className={`hbtn nodrag${workHere ? ' on' : ''}`} data-own-focus title={workHere ? 'Hide the browser and terminal' : 'Show the agents’ browser and terminal beside the chat'} onClick={onWork}><Icon name="screen" /></button>
+      {beside ? <button className="hbtn nodrag" data-own-focus title={`Close ${room?.name ?? 'this group'} here (it stays in the sidebar)`} aria-label={`Close ${room?.name ?? 'this group'} here`} onClick={onClose}><Icon name="x" /></button> : null}
     </div>
   )
 

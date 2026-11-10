@@ -1,10 +1,11 @@
-// Hermes One: the agents on the left; in the middle, Chief's chat or the chat with the agent you clicked;
-// on the right, an agent's latest work, a group, an agent's screen, or what needs you.
+// Hermes One: the agents on the left; in the middle, Chief's chat or the chat with the agent you clicked (or
+// several chats side by side, group chats too); on the right, an agent's latest work, its browser, terminal or
+// screen, or what needs you.
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { BotFace } from './components/BotFace'
 import { Chat } from './components/Chat'
 import { Composer } from './components/Composer'
-import { isWorkKey, lookKind, noteWorkClosed, toggleWork, WorkPane } from './components/Work'
+import { isWorkKey, lookKind, noteWorkClosed, parseWorkKey, toggleWork, WorkPane } from './components/Work'
 import { Panel } from './components/Panel'
 import { GroupPanel } from './components/Groups'
 import { Sidebar } from './components/Sidebar'
@@ -21,7 +22,8 @@ import { ConnBar, ConnCenter } from './components/ConnNote'
 import { openChat, sendToChief } from './lib/hermes'
 import { Icon } from './lib/icons'
 import { springTo, SPRING } from './lib/motion'
-import { chatOf, getState, setState, useStore } from './lib/store'
+import { chatOf, focusKeyOf, getState, PaneProfile, setState, useStore } from './lib/store'
+import { closePane, focusPane, openBeside, PANE_DRAG } from './lib/panes'
 
 // The right panel's width: dragged by its left edge (remembered on this Mac), else a share of the window.
 // It never gets narrower than 400 px or leaves the chat less than 440 px. An agent's screen beside the chat
@@ -32,7 +34,12 @@ const clampPanel = (v: number) => Math.round(Math.max(400, Math.min(Math.max(400
 const defaultPanel = (p: string | null) => (isWorkKey(p)
   ? clampPanel(Math.max(480, Math.min(1280, (window.innerWidth - 300) * 0.56)))
   : Math.round(Math.max(440, Math.min(905, (window.innerWidth - 300) * 0.56))))
-const panelWidth = (p: string | null = getState().panel) => (savedPanel(p) ? clampPanel(savedPanel(p)) : defaultPanel(p))
+// Beside several chats, the panel takes one chat's share of the room, so it never squeezes them.
+const panelWidth = (p: string | null = getState().panel) => {
+  const n = getState().view === 'chat' ? getState().panes.length : 1
+  if (n > 1) return Math.round(Math.max(400, (window.innerWidth - 300) / (n + 1)))
+  return savedPanel(p) ? clampPanel(savedPanel(p)) : defaultPanel(p)
+}
 
 export function App() {
   const connection = useStore((s) => s.connection)
@@ -40,13 +47,9 @@ export function App() {
   const panel = useStore((s) => s.panel)
   const toast = useStore((s) => s.toast)
   const busy = useStore((s) => s.chief.busy || s.bots.some((b) => b.status === 'working') || Object.values(s.chats).some((c) => c.busy))
-  const chatWith = useStore((s) => s.chatWith)
-  const groupOpen = useStore((s) => s.groupOpen)
-  const withBot = useStore((s) => s.bots.find((b) => b.profile === s.chatWith))
   const hasMsgs = useStore((s) => chatOf(s, s.chatWith).messages.length > 0)
-  const isChiefChat = chatWith === 'default'
-  const screenSupported = useStore((s) => !!s.screenSupported)
-  const workOpen = isWorkKey(panel)
+  const panes = useStore((s) => s.panes)
+  const focus = useStore(focusKeyOf)
   const [quick, setQuick] = useState(false)
   const [shown, setShown] = useState<string | null>(panel)
   const rp = useRef<HTMLDivElement>(null)
@@ -131,35 +134,23 @@ export function App() {
   }, [open, close, quick])
 
   useLayoutEffect(() => { if (rp.current) rp.current.style.width = `${width.current}px` })
+  // A chat opened or closed beside the others: an open panel springs to its new share.
+  const paneCount = useStore((s) => (s.view === 'chat' ? s.panes.length : 1))
+  const firstCount = useRef(true)
+  useEffect(() => {
+    if (firstCount.current) { firstCount.current = false; return }
+    if (!getState().panel) return
+    setTarget()
+    springTo('panel', panelWidth(), { from: width.current, k: SPRING.screen[0], z: SPRING.screen[1], eps: 0.3, apply: setW })
+  }, [paneCount])
 
   return (
     <div className="app" data-view={view} data-chat={hasMsgs ? 'busy' : 'empty'}>
       <div className="wsbg" aria-hidden="true" />
       <div className="wsframe" aria-hidden="true" />
       <Sidebar onQuick={() => setQuick(true)} />
-      {view === 'chat' && groupOpen ? (
-        <main className="chat gmain"><GroupPanel roomId={groupOpen} onClose={() => openChat(getState().chatWith)} /></main>
-      ) : view === 'chat' ? (
-        <main className="chat">
-          <div className="hdr drag">
-            {isChiefChat
-              ? <span className="crumb"><BotFace profile="default" size={20} watch={false} poseKey={getState().bots.find((b) => b.isChief)?.poseKey} /><span className="cur">Hermes</span><span className="sl">·</span><span>Leads your agents</span></span>
-              : <span className="crumb"><BotFace profile={chatWith} size={20} watch={false} poseKey={withBot?.poseKey} /><span className="cur">{withBot?.name ?? chatWith}</span>{withBot?.role ? <><span className="sl">·</span><span className="crole">{withBot.role}</span></> : null}</span>}
-            <span className="sp" />
-            <ChatSearchButton />
-            <ChatSettingsButton />
-            <button className={`hbtn nodrag${workOpen ? ' on' : ''}`} title={workOpen ? 'Hide the browser and terminal' : `Show ${isChiefChat ? 'Hermes' : withBot?.name ?? 'this agent'}’s ${lookKind() === 'screen' ? 'screen' : lookKind() === 'browser' ? 'browser' : 'commands'} and terminal beside the chat`} onClick={() => toggleWork()}><Icon name="screen" /></button>
-            <button className={`hbtn nodrag${panel && !workOpen ? ' on' : ''}`} title={isChiefChat ? 'Show the side panel' : `${withBot?.name ?? 'This agent'}’s latest work`} onClick={() => (panel && !workOpen ? close() : open(isChiefChat ? getState().lastPanel ?? '__needs' : chatWith))}><Icon name="panelR" /></button>
-          </div>
-          {connection === 'open' || hasMsgs ? (
-            <>
-              <Chat key={`chat:${chatWith}`} />
-              <ConnBar />
-              <Composer key={`box:${chatWith}`} />
-            </>
-          ) : <ConnCenter />}
-        </main>
-      ) : view === 'made' ? <Made />
+      {view === 'chat' ? <Panes panes={panes} focus={focus} onPanel={open} onClosePanel={close} />
+        : view === 'made' ? <Made />
         : view === 'scheduled' ? <PageFrame icon="clock" title="Scheduled"><ScheduledPage profile="default" /></PageFrame>
         : view === 'settings' ? <Settings />
         : view === 'marketplace' ? <Marketplace />
@@ -171,5 +162,104 @@ export function App() {
       {toast ? <div className="toast" key={toast}>{toast}</div> : null}
       <ConfirmHost />
     </div>
+  )
+}
+
+/** The chats in the middle, side by side (most of the time just one). A sidebar row dragged here drops between
+ *  them, at the line that shows where it will go. */
+function Panes({ panes, focus, onPanel, onClosePanel }: { panes: string[]; focus: string; onPanel: (key: string) => void; onClosePanel: () => void }) {
+  const box = useRef<HTMLDivElement>(null)
+  const [drop, setDrop] = useState<{ at: number; x: number } | null>(null)
+  const many = panes.length > 1
+  // Where a dragged chat lands: before the pane whose left half the pointer is over, or after the last one.
+  const spot = (clientX: number) => {
+    const el = box.current
+    if (!el) return null
+    const kids = [...el.querySelectorAll<HTMLElement>(':scope > .chat')]
+    const left = el.getBoundingClientRect().left
+    for (let i = 0; i < kids.length; i++) {
+      const r = kids[i].getBoundingClientRect()
+      if (clientX < r.left + r.width / 2) return { at: i, x: r.left - left }
+    }
+    const last = kids[kids.length - 1]?.getBoundingClientRect()
+    return { at: kids.length, x: last ? last.right - left : 0 }
+  }
+  return (
+    <div className={`panes${many ? ' many' : ''}`} ref={box}
+      onDragOver={(e) => { if (!e.dataTransfer.types.includes(PANE_DRAG)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setDrop(spot(e.clientX)) }}
+      onDragLeave={(e) => { if (!box.current?.contains(e.relatedTarget as Node | null)) setDrop(null) }}
+      onDrop={(e) => {
+        const key = e.dataTransfer.getData(PANE_DRAG)
+        const at = spot(e.clientX)?.at
+        setDrop(null)
+        if (key) { e.preventDefault(); openBeside(key, at) }
+      }}>
+      {panes.map((k) => (k.startsWith('group:')
+        ? <GroupPane key={k} k={k} focused={k === focus} />
+        : <ChatPane key={k} profile={k} focused={k === focus} many={many} onPanel={onPanel} onClosePanel={onClosePanel} />))}
+      {drop ? <div className="pdrop" style={{ left: drop.x }} aria-hidden="true" /> : null}
+    </div>
+  )
+}
+
+// A click anywhere in a chat gives it focus, except on controls that handle it themselves (data-own-focus).
+const focusOnPress = (key: string, focused: boolean) => (e: React.PointerEvent) => {
+  if (focused || (e.target as HTMLElement).closest('[data-own-focus]')) return
+  focusPane(key)
+}
+
+function GroupPane({ k, focused }: { k: string; focused: boolean }) {
+  return (
+    <main className={`chat gmain${focused ? ' on' : ''}`} onPointerDownCapture={focusOnPress(k, focused)}>
+      {/* Closing it beside other chats closes just this one; on its own, the agent's chat comes back. */}
+      <GroupPanel roomId={k.slice(6)} onClose={() => (getState().panes.length > 1 ? closePane(k) : openChat(getState().chatWith))} />
+    </main>
+  )
+}
+
+function ChatPane({ profile, focused, many, onPanel, onClosePanel }: { profile: string; focused: boolean; many: boolean; onPanel: (key: string) => void; onClosePanel: () => void }) {
+  const connection = useStore((s) => s.connection)
+  const panel = useStore((s) => s.panel)
+  const bot = useStore((s) => s.bots.find((b) => b.profile === profile))
+  const hasMsgs = useStore((s) => chatOf(s, profile).messages.length > 0)
+  const isChief = profile === 'default'
+  const name = isChief ? 'Hermes' : bot?.name ?? profile
+  const workHere = isWorkKey(panel) && parseWorkKey(panel!).profile === profile
+  const latestHere = !!panel && !isWorkKey(panel) && (isChief ? panel === getState().lastPanel || panel === '__needs' : panel === profile)
+  // The side panel belongs to the chat in focus: these buttons focus this chat first, then show or hide it.
+  const onWork = () => {
+    if (workHere) { onClosePanel(); return }
+    focusPane(profile) // an open browser, terminal or screen follows the focus to this agent
+    const p = getState().panel
+    if (!(isWorkKey(p) && parseWorkKey(p!).profile === profile)) toggleWork(profile)
+  }
+  const onLatest = () => {
+    if (latestHere) { onClosePanel(); return }
+    focusPane(profile)
+    onPanel(isChief ? getState().lastPanel ?? '__needs' : profile)
+  }
+  return (
+    <PaneProfile.Provider value={profile}>
+      <main className={`chat${focused ? ' on' : ''}`} onPointerDownCapture={focusOnPress(profile, focused)}>
+        <div className="hdr drag">
+          {isChief
+            ? <span className="crumb"><BotFace profile="default" size={20} watch={false} poseKey={getState().bots.find((b) => b.isChief)?.poseKey} /><span className="cur">Hermes</span><span className="sl">·</span><span className="crole">Leads your agents</span></span>
+            : <span className="crumb"><BotFace profile={profile} size={20} watch={false} poseKey={bot?.poseKey} /><span className="cur">{name}</span>{bot?.role ? <><span className="sl">·</span><span className="crole">{bot.role}</span></> : null}</span>}
+          <span className="sp" />
+          <ChatSearchButton />
+          <ChatSettingsButton />
+          <button className={`hbtn nodrag${workHere ? ' on' : ''}`} data-own-focus title={workHere ? 'Hide the browser and terminal' : `Show ${name}’s ${lookKind() === 'screen' ? 'screen' : lookKind() === 'browser' ? 'browser' : 'commands'} and terminal beside the chat`} onClick={onWork}><Icon name="screen" /></button>
+          <button className={`hbtn nodrag${latestHere ? ' on' : ''}`} data-own-focus title={isChief ? 'Show the side panel' : `${name}’s latest work`} onClick={onLatest}><Icon name="panelR" /></button>
+          {many ? <button className="hbtn nodrag" data-own-focus title={`Close ${name}’s chat here (it stays in the sidebar)`} aria-label={`Close ${name}’s chat here`} onClick={() => closePane(profile)}><Icon name="x" /></button> : null}
+        </div>
+        {connection === 'open' || hasMsgs ? (
+          <>
+            <Chat key={`chat:${profile}`} />
+            {focused ? <ConnBar /> : null}
+            <Composer key={`box:${profile}`} />
+          </>
+        ) : <ConnCenter />}
+      </main>
+    </PaneProfile.Provider>
   )
 }

@@ -47,6 +47,7 @@ In Hermes Desktop, the plugin's look and browser view stay off until you turn th
   - Group chats have a lead, @mentions and approvals.
   - Anything that needs you (an approval, a question, a password) shows up as a card.
 - **Group chats** open in the middle, like an agent's chat.
+- **Several chats side by side:** ⌘-click an agent or a group in the sidebar (Ctrl+click on Windows), or drag it onto the chats, to open it beside the others. Up to four fit, as the window allows. The one with the blue line is the one you're typing in, and the side panel follows its agent.
 - **Beside the chat:**
   - the agent's own browser, with closable tabs, an address bar and Take over;
   - its screen, on Linux servers;

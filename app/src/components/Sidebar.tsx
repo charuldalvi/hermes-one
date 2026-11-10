@@ -17,6 +17,7 @@ import { GroupsSection } from './Groups'
 import { SystemButton } from './Systems'
 import { isWorkKey, openWork, parseWorkKey } from './Work'
 import { useGroupNeeds } from '../lib/groups'
+import { chatRowProps } from '../lib/panes'
 
 const APP_MARK = new URL('../assets/app-mark.png', import.meta.url).href
 const PAGES: { view: State['view']; icon: string; label: string; title: string }[] = [
@@ -69,6 +70,9 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
   const panelOpen = !!panel && panel !== '__needs' && !isWorkKey(panel)
   const chatWith = useStore((s) => s.chatWith)
   const groupOpen = useStore((s) => s.groupOpen)
+  // Chats open beside the one in focus read a little brighter.
+  const besides = useStore((s) => (s.view === 'chat' && s.panes.length > 1 ? s.panes.join('|') : ''))
+  const beside = (key: string) => besides.split('|').includes(key)
   const chiefOn = view === 'chat' && !panelOpen && !groupOpen && chatWith === 'default'
   const chief: Bot = { ...(chiefBot ?? { profile: 'default', isChief: true, online: true, status: 'free' as const }), name: 'Hermes', role: 'Leads your agents. Talk to Hermes here.',
     ...(chiefBusy ? { status: 'working' as const, since: chiefSince } : {}) }
@@ -111,8 +115,8 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
           <Icon name="search" size={13} /><kbd>⌘K</kbd>
         </button>
       </div>
-      <button className={`chiefhero nodrag${chiefOn ? ' on' : ''}`} title="Hermes leads your agents. Talk to Hermes here."
-        onClick={() => openChat('default')}>
+      <button className={`chiefhero nodrag${chiefOn ? ' on' : ''}${!chiefOn && beside('default') ? ' in' : ''}`} title={'Hermes leads your agents. Talk to Hermes here.\n⌘-click or drag to open beside the other chats'}
+        {...chatRowProps('default', () => openChat('default'))}>
         <BotFace profile="default" size={64} mood={botMood(chief, 64, pending)} poseKey={chief.poseKey} />
         <span className="ch-tx">
           <span className="ch-n">Hermes</span>
@@ -126,8 +130,8 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
         {team.map((b) => {
           const waiting = pending.some((n) => n.profile === b.profile)
           return (
-            <button key={b.profile} className={`row bot${selKey === `bot:${b.profile}` ? ' on' : ''}`} data-sel={`bot:${b.profile}`} title={b.role ? `${b.role}\nClick to talk to ${b.name}` : `Talk to ${b.name}`}
-              onClick={() => openChat(b.profile)}>
+            <button key={b.profile} className={`row bot${selKey === `bot:${b.profile}` ? ' on' : beside(b.profile) ? ' in' : ''}`} data-sel={`bot:${b.profile}`} title={`${b.role ? `${b.role}\nClick to talk to ${b.name}` : `Talk to ${b.name}`}\n⌘-click or drag to open beside the other chats`}
+              {...chatRowProps(b.profile, () => openChat(b.profile))}>
               <BotFace profile={b.profile} size={36} mood={botMood(b, 36, pending)} poseKey={b.poseKey} watch={false} />
               <span className="nm">{b.name}</span>
               <StatusMark bot={b} waiting={waiting} />

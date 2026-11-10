@@ -10,7 +10,7 @@ export const IS_WIN = PLATFORM === 'win32'
 
 // Most specific first.
 const RULES: [RegExp, string][] = [
-  [/⌘\+/g, 'Ctrl+Plus'], [/⌘−/g, 'Ctrl+Minus'], [/⌘ ?/g, 'Ctrl+'],
+  [/⌘\+/g, 'Ctrl+Plus'], [/⌘−/g, 'Ctrl+Minus'], [/⌘-click/g, 'Ctrl+click'], [/⌘ ?/g, 'Ctrl+'],
   [/⌥-click/g, 'Alt+click'], [/⌥ ?/g, 'Alt+'], [/⇧ ?/g, 'Shift+'],
   [/\bShow in Finder\b/g, 'Show in File Explorer'], [/\bFinder\b/g, 'File Explorer'],
   [/\bA Mac notification\b/g, 'A Windows notification'], [/\bMac notification/g, 'Windows notification'],

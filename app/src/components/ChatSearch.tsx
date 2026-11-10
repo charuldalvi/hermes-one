@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { prettyName } from '../lib/hermes'
 import { Icon } from '../lib/icons'
-import { chatOf, useStore } from '../lib/store'
+import { chatOf, usePaneProfile, useStore } from '../lib/store'
 import { Dialog, Search } from './ui'
 
 function snippet(text: string, q: string): { before: string; hit: string; after: string } {
@@ -30,7 +30,8 @@ export function ChatSearchButton() {
 }
 
 function ChatSearch({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const msgs = useStore((s) => chatOf(s, s.chatWith).messages)
+  const profile = usePaneProfile()
+  const msgs = useStore((s) => chatOf(s, profile).messages)
   const [q, setQ] = useState('')
   const [sel, setSel] = useState(0)
   const list = useRef<HTMLDivElement>(null)

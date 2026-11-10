@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gateway } from '../lib/gateway'
 import { completeSlash, runCommand, toast } from '../lib/hermes'
 import { Icon } from '../lib/icons'
-import { chatOf, getState, useStore } from '../lib/store'
+import { chatOf, getState, usePaneProfile, useStore } from '../lib/store'
 import { confirm, Popover, Select, Spinner, Switch, Tabs } from './ui'
 
 const APPROVAL_HINT: Record<string, string> = {
@@ -19,15 +19,13 @@ const BUSY_HINT: Record<string, string> = {
   interrupt: 'A new message stops the current turn and starts yours.',
 }
 
-// The chat in the middle: Chief's, or the agent's whose chat is open.
-async function get(key: string): Promise<string | undefined> {
-  const profile = getState().chatWith
+// This chat's settings: Chief's, or the agent's whose chat it is.
+async function get(key: string, profile: string): Promise<string | undefined> {
   const sid = chatOf(getState(), profile).sessionId
   if (!sid) return undefined
   try { return (await gateway.request<any>('config.get', { key, session_id: sid, profile }, 30_000))?.value } catch { return undefined }
 }
-async function set(key: string, value: string) {
-  const profile = getState().chatWith
+async function set(key: string, value: string, profile: string) {
   const sid = chatOf(getState(), profile).sessionId
   if (!sid) throw new Error('Not connected')
   return gateway.request<any>('config.set', { key, value, session_id: sid, profile }, 30_000)
@@ -47,24 +45,25 @@ export function ChatSettingsButton() {
 }
 
 function ChatSettingsBody({ onClose }: { onClose: () => void }) {
-  const personality = useStore((s) => chatOf(s, s.chatWith).personality)
-  const who = useStore((s) => (s.chatWith === 'default' ? 'Hermes' : s.bots.find((b) => b.profile === s.chatWith)?.name ?? 'this agent'))
+  const profile = usePaneProfile()
+  const personality = useStore((s) => chatOf(s, profile).personality)
+  const who = useStore((s) => (profile === 'default' ? 'Hermes' : s.bots.find((b) => b.profile === profile)?.name ?? 'this agent'))
   const [mode, setMode] = useState<string>()
   const [yolo, setYolo] = useState<string>()
   const [busy, setBusy] = useState<string>()
   const [persons, setPersons] = useState<{ text: string; meta?: string }[] | null>(null)
   const [person, setPerson] = useState<string | undefined>(personality)
   useEffect(() => {
-    void get('approval_mode').then((v) => setMode(v ?? 'smart'))
-    void get('yolo').then((v) => setYolo(v ?? '0'))
-    void get('busy').then((v) => setBusy(v ?? 'interrupt'))
-    completeSlash('/personality ').then((items) => setPersons(items)).catch(() => setPersons([]))
+    void get('approval_mode', profile).then((v) => setMode(v ?? 'smart'))
+    void get('yolo', profile).then((v) => setYolo(v ?? '0'))
+    void get('busy', profile).then((v) => setBusy(v ?? 'interrupt'))
+    completeSlash('/personality ', profile).then((items) => setPersons(items)).catch(() => setPersons([]))
   }, [])
   useEffect(() => { if (personality) setPerson(personality) }, [personality])
 
   const change = async (key: string, value: string, apply: (v: string) => void, before?: string) => {
     apply(value)
-    try { const r = await set(key, value); if (typeof r?.value === 'string') apply(r.value) } catch (e: any) { if (before !== undefined) apply(before); toast(`Couldn’t change that: ${e?.message ?? e}`) }
+    try { const r = await set(key, value, profile); if (typeof r?.value === 'string') apply(r.value) } catch (e: any) { if (before !== undefined) apply(before); toast(`Couldn’t change that: ${e?.message ?? e}`) }
   }
   return (
     <div className="cs">
@@ -101,8 +100,8 @@ function ChatSettingsBody({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="cs-foot">
-        <button className="b-text sm" onClick={() => { onClose(); void runCommand('/usage') }}><Icon name="chart" size={14} />Usage</button>
-        <button className="b-text sm" onClick={() => { onClose(); void runCommand('/status') }}><Icon name="info" size={14} />Status</button>
+        <button className="b-text sm" onClick={() => { onClose(); void runCommand('/usage', profile) }}><Icon name="chart" size={14} />Usage</button>
+        <button className="b-text sm" onClick={() => { onClose(); void runCommand('/status', profile) }}><Icon name="info" size={14} />Status</button>
         <span className="sp" />
         <button className="b-text sm" onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('hermes:send', { detail: '/new' })) }}><Icon name="refresh" size={14} />Tidy up the chat</button>
       </div>

@@ -8,7 +8,7 @@ import { completeSlash, loadCommands, loadModels, sendTo, setChatSetting, stopCh
 import { Icon } from '../lib/icons'
 import { BrandMark, ModelMark, providerBrand } from '../lib/logos'
 import { chatMood } from '../lib/moods'
-import { useChat, useStore } from '../lib/store'
+import { focusKeyOf, getState, useChat, useStore } from '../lib/store'
 import { BotFace } from './BotFace'
 import { EffortSlider } from './EffortSlider'
 import { Popover, Search, Spinner, Switch } from './ui'
@@ -43,11 +43,11 @@ function byProvider(items: ModelItem[]): ProviderGroup[] {
 
 /** The model card: how hard this chat's agent thinks (the pixel slider), fast mode, and every model to switch to. */
 function ModelCard({ anchor, open, onClose }: { anchor: HTMLElement | null; open: boolean; onClose: () => void }) {
-  const chief = useChat().chat
+  const { profile, chat: chief } = useChat()
   const [items, setItems] = useState<ModelItem[] | null>(null)
   const [err, setErr] = useState('')
   const [q, setQ] = useState('')
-  useEffect(() => { if (open) { setQ(''); loadModels().then(setItems).catch((e) => { setErr(String(e?.message ?? e)); setItems([]) }) } }, [open])
+  useEffect(() => { if (open) { setQ(''); loadModels(profile).then(setItems).catch((e) => { setErr(String(e?.message ?? e)); setItems([]) }) } }, [open])
   const cur = items?.find((i) => i.current) ?? items?.find((i) => i.model === chief.model)
   const reasoning = cur ? cur.reasoning : true
   const stop = effortStop(chief.effort)
@@ -65,11 +65,11 @@ function ModelCard({ anchor, open, onClose }: { anchor: HTMLElement | null; open
     <Popover anchor={anchor} open={open} onClose={onClose} width={360} align="end" side="above" className="modelcard">
       <div className="mc-think">
         <div className="mc-row"><span className="mc-lab">Thinking</span><b>{reasoning ? EFFORT_LABELS[stop] : 'Not offered'}</b></div>
-        <EffortSlider stop={stop} labels={EFFORT_LABELS} enabled={reasoning} width={336} onStop={(i) => void setChatSetting('reasoning', EFFORT_STOPS[i])} />
+        <EffortSlider stop={stop} labels={EFFORT_LABELS} enabled={reasoning} width={336} onStop={(i) => void setChatSetting('reasoning', EFFORT_STOPS[i], profile)} />
         <p className="mc-hint">{!reasoning ? 'This model answers without thinking first.' : chief.fast === 'fast' ? `${EFFORT_HINTS[stop]} Fast mode is on: quicker, and can cost more.` : EFFORT_HINTS[stop]}</p>
         {cur?.fast ? (
           <div className="mc-row mc-fast"><Icon name="bolt" size={15} /><span>Fast mode</span><em>Quicker answers, can cost more</em>
-            <Switch on={chief.fast === 'fast'} label="Fast mode" onChange={(on) => void setChatSetting('fast', on ? 'fast' : 'normal')} /></div>
+            <Switch on={chief.fast === 'fast'} label="Fast mode" onChange={(on) => void setChatSetting('fast', on ? 'fast' : 'normal', profile)} /></div>
         ) : null}
       </div>
       <div className="mc-models">
@@ -91,7 +91,7 @@ function ModelCard({ anchor, open, onClose }: { anchor: HTMLElement | null; open
               </button>
               <div className="mc-pb"><div className="mc-pbi">
                 {(full.has(g.key) ? g.models : firstModels(g.models)).map((it) => (
-                  <button key={`${it.provider}/${it.model}`} tabIndex={isOpen ? 0 : -1} className={`mi${it.current ? ' on' : ''}`} onClick={() => { onClose(); if (!it.current) void switchModel(it.model, it.provider) }}>
+                  <button key={`${it.provider}/${it.model}`} tabIndex={isOpen ? 0 : -1} className={`mi${it.current ? ' on' : ''}`} onClick={() => { onClose(); if (!it.current) void switchModel(it.model, it.provider, profile) }}>
                     <ModelMark model={it.model} provider={it.provider} />
                     <span className="ml">{prettyModel(it.label)}</span>
                     {it.fast ? <Icon name="bolt" size={12} style={{ color: 'var(--text-icon)' }} /> : null}
@@ -117,16 +117,16 @@ function ModelCard({ anchor, open, onClose }: { anchor: HTMLElement | null; open
 const SUGGESTED = ['model', 'usage', 'status', 'personality', 'skills', 'retry', 'undo', 'compact', 'btw', 'background', 'cron', 'help']
 
 /** What "/" offers: commands as you type a name, then Hermes' own completions for its argument. */
-function useSlash(text: string) {
+function useSlash(text: string, profile: string) {
   const [all, setAll] = useState<SlashCommand[]>([])
   const [args, setArgs] = useState<{ text: string; display?: string; meta?: string }[]>([])
   const active = /^\/[^\s]*$/.test(text)
   const argMode = /^\/\S+\s/.test(text) && !text.includes('\n')
-  useEffect(() => { if (text.startsWith('/') && !all.length) void loadCommands().then(setAll).catch(() => {}) }, [text.startsWith('/')])
+  useEffect(() => { if (text.startsWith('/') && !all.length) void loadCommands(false, profile).then(setAll).catch(() => {}) }, [text.startsWith('/')])
   useEffect(() => {
     if (!argMode) { setArgs([]); return }
     let alive = true
-    const t = setTimeout(() => { completeSlash(text).then((items) => { if (alive) setArgs(items.slice(0, 40)) }).catch(() => { if (alive) setArgs([]) }) }, 120)
+    const t = setTimeout(() => { completeSlash(text, profile).then((items) => { if (alive) setArgs(items.slice(0, 40)) }).catch(() => { if (alive) setArgs([]) }) }, 120)
     return () => { alive = false; clearTimeout(t) }
   }, [text, argMode])
   const items = useMemo(() => {
@@ -164,14 +164,16 @@ export function Composer() {
   const [drag, setDrag] = useState(false)
   const addFiles = (more: Attachment[]) => setFiles((f) => [...f, ...more.filter((m) => !f.some((x) => x.path === m.path))])
   const [card, setCard] = useState(false)
-  const slash = useSlash(text)
+  const slash = useSlash(text, profile)
+  // Beside other chats, "type here", "edit and send again" and the model card are for the chat in focus.
+  const mine = () => focusKeyOf(getState()) === profile
   const [pick, setPick] = useState(0)
   const [slashOff, setSlashOff] = useState(false)
   useEffect(() => { setPick(0); setSlashOff(false) }, [slash.length, text.split(' ')[0]])
   const slashOpen = slash.length > 0 && !slashOff
   useEffect(() => {
-    const open = () => setCard(true)
-    const prefill = (e: Event) => { setText(String((e as CustomEvent).detail ?? '')); area.current?.focus() }
+    const open = () => { if (mine()) setCard(true) }
+    const prefill = (e: Event) => { if (!mine()) return; setText(String((e as CustomEvent).detail ?? '')); area.current?.focus() }
     window.addEventListener('hermes:open-model-card', open)
     window.addEventListener('hermes:prefill', prefill)
     return () => { window.removeEventListener('hermes:open-model-card', open); window.removeEventListener('hermes:prefill', prefill) }
@@ -186,7 +188,7 @@ export function Composer() {
     el.style.height = Math.min(240, el.scrollHeight) + 'px'
   }, [text])
   useEffect(() => {
-    const focus = () => area.current?.focus()
+    const focus = () => { if (mine()) area.current?.focus() }
     window.addEventListener('hermes:focus-composer', focus)
     return () => window.removeEventListener('hermes:focus-composer', focus)
   }, [])
