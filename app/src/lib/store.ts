@@ -108,7 +108,9 @@ export interface State {
   /** Whose chat is in the middle: 'default' is Chief. */
   chatWith: string
   needs: Need[]
-  panel: string | null // a bot profile, 'group:<room>', 'screen:<profile>', '__needs', or null
+  panel: string | null // a bot profile, 'browser:' / 'screen:' / 'term:<profile>', '__needs', or null
+  /** A group chat open in the middle (instead of an agent's chat): its room id. */
+  groupOpen: string | null
   lastPanel: string | null
   view: 'chat' | 'made' | 'scheduled' | 'apps' | 'settings' | 'marketplace' | 'projects'
   /** This system's Hermes has an agent screen (Linux): it can show beside the chat. */
@@ -135,6 +137,7 @@ let state: State = {
   chatWith: 'default',
   needs: [],
   panel: null,
+  groupOpen: null,
   lastPanel: null,
   view: 'chat',
   settingsPage: 'team',

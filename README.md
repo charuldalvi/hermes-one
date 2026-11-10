@@ -9,6 +9,8 @@ It comes in two parts, in this one repo:
 
 Hermes One is a community project. It is not made by or affiliated with Nous Research.
 
+![Hermes One: one chat with Hermes, your agents in the sidebar, each with its own face](docs/screenshots/chat.png)
+
 ## Install
 
 One command installs (or updates) both: the plugin into your Hermes and every agent's profile, and the app. It restarts Hermes so the plugin loads, but only when no agent is working.
@@ -44,10 +46,15 @@ In Hermes Desktop, the plugin's look and browser view stay off until you turn th
   - Hermes adds agents and arranges them into groups by craft.
   - Group chats have a lead, @mentions and approvals.
   - Anything that needs you (an approval, a question, a password) shows up as a card.
+- **Group chats** open in the middle, like an agent's chat.
 - **Beside the chat:**
   - the agent's own browser, with closable tabs, an address bar and Take over;
   - its screen, on Linux servers;
   - its terminal, one tab per command, live.
+
+![The agent's own browser beside its chat: its tabs, the page it's reading, and Take over](docs/screenshots/browser.png)
+
+![In light mode: Claude Code running in the agent's terminal, one tab per command](docs/screenshots/terminal-light.png)
 - **Pages:** apps your agents build, files they made, Hermes' board, scheduled jobs, the marketplace, and all of Hermes' settings.
 - **Other computers:** reach Hermes on another machine by Tailscale, an address or SSH.
 

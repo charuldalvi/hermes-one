@@ -174,6 +174,9 @@ export async function stopTerm(t: Term) {
   patch(t.id, { status: 'failed', endedAt: Date.now() })
 }
 
+/** Screenshot demo only (dev/Demo.tsx): a made-up command with its output. */
+export function showDemoTerm(t: Term, out: string) { put(t); write(t.id, out) }
+
 /** Close a finished tab (a running one stays until it ends or is stopped). */
 export function closeTerm(id: string) { terms = terms.filter((t) => t.id !== id); output.delete(id); emit() }
 

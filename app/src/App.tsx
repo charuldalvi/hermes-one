@@ -18,7 +18,7 @@ import { ConfirmHost } from './components/ui'
 import { ChatSettingsButton } from './components/ChatSettings'
 import { ChatSearchButton } from './components/ChatSearch'
 import { ConnBar, ConnCenter } from './components/ConnNote'
-import { sendToChief } from './lib/hermes'
+import { openChat, sendToChief } from './lib/hermes'
 import { Icon } from './lib/icons'
 import { springTo, SPRING } from './lib/motion'
 import { chatOf, getState, setState, useStore } from './lib/store'
@@ -41,6 +41,7 @@ export function App() {
   const toast = useStore((s) => s.toast)
   const busy = useStore((s) => s.chief.busy || s.bots.some((b) => b.status === 'working') || Object.values(s.chats).some((c) => c.busy))
   const chatWith = useStore((s) => s.chatWith)
+  const groupOpen = useStore((s) => s.groupOpen)
   const withBot = useStore((s) => s.bots.find((b) => b.profile === s.chatWith))
   const hasMsgs = useStore((s) => chatOf(s, s.chatWith).messages.length > 0)
   const isChiefChat = chatWith === 'default'
@@ -136,7 +137,9 @@ export function App() {
       <div className="wsbg" aria-hidden="true" />
       <div className="wsframe" aria-hidden="true" />
       <Sidebar onQuick={() => setQuick(true)} />
-      {view === 'chat' ? (
+      {view === 'chat' && groupOpen ? (
+        <main className="chat gmain"><GroupPanel roomId={groupOpen} onClose={() => openChat(getState().chatWith)} /></main>
+      ) : view === 'chat' ? (
         <main className="chat">
           <div className="hdr drag">
             {isChiefChat
@@ -162,8 +165,7 @@ export function App() {
         : view === 'marketplace' ? <Marketplace />
         : view === 'projects' ? <Projects />
         : <Apps />}
-      <aside className="rp" ref={rp}>{shown ? <div className="rp-grip" onPointerDown={drag} onDoubleClick={resetWidth} title="Drag to resize · double-click for the usual width" role="separator" aria-orientation="vertical" aria-label="Resize the side panel" /> : null}{shown ? (shown.startsWith('group:') ? <GroupPanel roomId={shown.slice(6)} onClose={close} />
-        : isWorkKey(shown) ? <WorkPane panelKey={shown} onClose={close} />
+      <aside className="rp" ref={rp}>{shown ? <div className="rp-grip" onPointerDown={drag} onDoubleClick={resetWidth} title="Drag to resize · double-click for the usual width" role="separator" aria-orientation="vertical" aria-label="Resize the side panel" /> : null}{shown ? (isWorkKey(shown) ? <WorkPane panelKey={shown} onClose={close} />
         : <Panel profile={shown} onClose={close} />) : null}</aside>
       {quick ? <QuickActions onClose={() => setQuick(false)} /> : null}
       {toast ? <div className="toast" key={toast}>{toast}</div> : null}

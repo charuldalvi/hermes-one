@@ -68,7 +68,8 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
   const screenOpen = isWorkKey(panel) && parseWorkKey(panel).kind === 'screen'
   const panelOpen = !!panel && panel !== '__needs' && !isWorkKey(panel)
   const chatWith = useStore((s) => s.chatWith)
-  const chiefOn = view === 'chat' && !panelOpen && chatWith === 'default'
+  const groupOpen = useStore((s) => s.groupOpen)
+  const chiefOn = view === 'chat' && !panelOpen && !groupOpen && chatWith === 'default'
   const chief: Bot = { ...(chiefBot ?? { profile: 'default', isChief: true, online: true, status: 'free' as const }), name: 'Hermes', role: 'Leads your agents. Talk to Hermes here.',
     ...(chiefBusy ? { status: 'working' as const, since: chiefSince } : {}) }
   const needN = useRef<HTMLSpanElement>(null)
@@ -82,7 +83,7 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
   }, [])
 
   const roomCount = useStore((s) => s.rooms.length)
-  const selKey = panelOpen ? `bot:${panel}` : view === 'settings' ? 'none' : view === 'chat' && chatWith !== 'default' ? `bot:${chatWith}` : `view:${view}`
+  const selKey = panelOpen ? `bot:${panel}` : view === 'settings' ? 'none' : view === 'chat' && groupOpen ? `bot:group:${groupOpen}` : view === 'chat' && chatWith !== 'default' ? `bot:${chatWith}` : `view:${view}`
   const pageKey = view === 'chat' && screenOpen ? 'view:screen' : selKey
   const first = useRef({ list: true, pages: true })
   useLayoutEffect(() => {

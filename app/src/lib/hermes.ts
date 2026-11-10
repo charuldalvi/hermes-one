@@ -158,7 +158,7 @@ export function openChat(profile: string) {
   const work = panel?.match(/^(browser|screen|term):/)?.[1]
   if (work) { if (panel !== `${work}:${profile}`) window.dispatchEvent(new CustomEvent('hermes:open-panel', { detail: { profile: `${work}:${profile}` } })) }
   else window.dispatchEvent(new CustomEvent('hermes:close-panel'))
-  setState({ chatWith: profile, view: 'chat' })
+  setState({ chatWith: profile, view: 'chat', groupOpen: null })
   if (isChief(profile)) return
   const cur = getState().chats[profile]
   if (!cur || (!cur.loading && !cur.sessionId)) void loadChat(profile)

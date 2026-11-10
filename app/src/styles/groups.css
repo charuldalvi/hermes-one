@@ -168,3 +168,7 @@ button.gchip.on { background: var(--bg-selected); color: var(--text-primary); bo
 .gcomposer .mwrap textarea { color: transparent; caret-color: var(--text-primary); position: relative; }
 .gcomposer .mwrap textarea::selection { color: transparent; background: color-mix(in srgb, var(--blue-500) 30%, transparent); }
 [data-text="large"] .gcomposer .mback { font-size: 17px; line-height: 26px; }
+
+/* A group chat in the middle of the window (like an agent's chat), not in the side panel. */
+.gmain .rpin { width: 100%; }
+.gmain .rcol { max-width: 760px; width: 100%; margin: 0 auto; }

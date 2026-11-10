@@ -87,6 +87,8 @@ export function getGroups() { return gs }
 let roomEventsHook: ((roomId: string, events: RoomEvent[], members: RoomMember[]) => void) | null = null
 export function setRoomEventsHook(fn: typeof roomEventsHook) { roomEventsHook = fn }
 function set(patch: Partial<GroupsState>) { gs = { ...gs, ...patch }; listeners.forEach((l) => l()) }
+/** Screenshot demo only (dev/Demo.tsx): made-up groups for the sidebar. */
+export const showDemoGroups = (rooms: Room[]) => set({ phase: 'ready', rooms })
 function subscribe(l: () => void) { listeners.add(l); return () => { listeners.delete(l) } }
 /** Read the groups slice; the selector must return something stable (a field, not a new object). */
 export function useGroups<T>(select: (s: GroupsState) => T): T { return useSyncExternalStore(subscribe, () => select(gs)) }
@@ -511,8 +513,12 @@ export async function downloadAttachment(roomId: string, eventId: string, a: Roo
 }
 
 /** Open a group in the right panel (the bead you clicked flies into its title). */
-export function openGroup(roomId: string, from?: Element | null) {
-  window.dispatchEvent(new CustomEvent('hermes:open-panel', { detail: { profile: `group:${roomId}`, from } }))
+/** A group chat takes the middle, like an agent's chat; the side panel stays for the agents' browser, terminal or
+ *  screen (anything else in it closes). */
+export function openGroup(roomId: string, _from?: Element | null) {
+  const panel = getState().panel
+  if (panel && !/^(browser|screen|term):/.test(panel)) window.dispatchEvent(new CustomEvent('hermes:close-panel'))
+  setMain({ view: 'chat', groupOpen: roomId })
 }
 
 // ---------- reading a room: who's doing what (pure; the sidebar, header, members and log agree) ----------

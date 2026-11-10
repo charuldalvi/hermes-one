@@ -10,6 +10,7 @@ import { Terminal as XTerm } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 import { gateway } from '../lib/gateway'
+import { getGroups } from '../lib/groups'
 import { prettyName, sessionProfile, toast } from '../lib/hermes'
 import { Icon } from '../lib/icons'
 import { elapsed } from '../lib/markdown'
@@ -57,7 +58,9 @@ export function noteWorkClosed(key: string | null) {
 }
 function autoOpen(kind: WorkKind, profile: string) {
   const s = getState()
-  if (s.view !== 'chat' || s.chatWith !== profile) return // only for the chat you're looking at
+  // Only for the chat you're looking at: the agent's own, or a group it's in.
+  const group = s.groupOpen ? getGroups().rooms.find((r) => r.room_id === s.groupOpen) : null
+  if (s.view !== 'chat' || (group ? !group.members.some((m) => m.profile === profile) : s.chatWith !== profile)) return
   const turn = chatOf(s, profile).turnStartedAt ?? 0
   const closedAt = dismissed.get(profile)
   if (closedAt && closedAt >= turn) return

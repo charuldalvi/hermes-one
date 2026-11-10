@@ -18,6 +18,7 @@ import { lookOf } from '../lib/looks'
 import { renderMarkdown } from '../lib/markdown'
 import { useStore, type Bot } from '../lib/store'
 import { BotFace, type Mood } from './BotFace'
+import { toggleWork } from './Work'
 import { confirm, Dialog, Empty, ErrorLine, Spinner, Tabs } from './ui'
 import '../styles/groups.css'
 
@@ -118,7 +119,7 @@ export function GroupsSection() {
   const rooms = useGroups((s) => s.rooms)
   const phase = useGroups((s) => s.phase)
   const error = useGroups((s) => s.error)
-  const panel = useStore((s) => s.panel)
+  const openRoom = useStore((s) => (s.view === 'chat' ? s.groupOpen : null))
   const connection = useStore((s) => s.connection)
   const [creating, setCreating] = useState(false)
   const bots = useStore((s) => s.bots.filter((b) => !b.isChief).length)
@@ -130,7 +131,7 @@ export function GroupsSection() {
             <Icon name="spark" size={12} />Let Hermes arrange</button>
           <button className="garr gadd" disabled={connection !== 'open'} title="New group" aria-label="New group" onClick={() => setCreating(true)}><Icon name="plus" size={13} /></button>
         </span></div>
-      {rooms.map((r) => <GroupRow key={r.room_id} room={r} on={panel === `group:${r.room_id}`} />)}
+      {rooms.map((r) => <GroupRow key={r.room_id} room={r} on={openRoom === r.room_id} />)}
       {phase === 'error' && !rooms.length ? <div className="lab gnote-side" title={error}>Groups couldn’t load. Retrying…</div> : null}
       {!rooms.length && phase !== 'error' ? <button className="row gnew" disabled={connection !== 'open'} onClick={() => setCreating(true)}><span className="gplus"><Icon name="plus" size={13} /></span><span className="nm">New group</span></button> : null}
       <NewGroupDialog open={creating} onClose={() => setCreating(false)} />
@@ -492,11 +493,13 @@ function useStickToBottom(dep: unknown) {
 
 /** The right-panel view of one group. `roomId` is the panel id without its `group:` prefix. Keyed by room, so
  *  another room never inherits this one's draft, reply or scroll. */
+/** One group chat, in the middle of the window (like an agent's chat). Keyed by room, so switching groups starts fresh. */
 export function GroupPanel({ roomId, onClose }: { roomId: string; onClose: () => void }) {
   return <RoomPanel key={roomId} roomId={roomId} onClose={onClose} />
 }
 
 function RoomPanel({ roomId, onClose }: { roomId: string; onClose: () => void }) {
+  const workOpen = useStore((s) => /^(browser|screen|term):/.test(s.panel ?? ''))
   useWatchRoom(roomId)
   const view = useRoomView(roomId)
   const listed = useRoom(roomId)
@@ -536,7 +539,9 @@ function RoomPanel({ roomId, onClose }: { roomId: string; onClose: () => void })
       </span>
       <span className="sp" />
       {room && !view?.gone ? <button className="hbtn nodrag" title="Group settings" onClick={() => setSettings(true)}><Icon name="sliders" /></button> : null}
-      <button className="hbtn nodrag" onClick={onClose} aria-label="Close"><Icon name="x" /></button>
+      {/* The side panel shows the group's agents at work: its lead's (or first member's) browser and terminal first. */}
+      <button className={`hbtn nodrag${workOpen ? ' on' : ''}`} title={workOpen ? 'Hide the browser and terminal' : 'Show the agents’ browser and terminal beside the chat'}
+        onClick={() => toggleWork(lead ? byId.get(lead)?.profile ?? members[0]?.profile : members[0]?.profile)}><Icon name="screen" /></button>
     </div>
   )
 
