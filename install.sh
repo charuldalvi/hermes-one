@@ -9,16 +9,18 @@
 # Options (after `sh -s --`):  --plugin-only   skip the app
 #                              --app-only      skip the plugin
 #                              --no-restart    don't restart Hermes
+#                              --no-open       install the app without opening it
 set -eu
 
 REPO="charuldalvi/hermes-one"
 APP_NAME="Hermes One"
-PLUGIN=1 APP=1 RESTART=1
+PLUGIN=1 APP=1 RESTART=1 OPEN=1
 for arg in "$@"; do
   case "$arg" in
     --plugin-only) APP=0 ;;
     --app-only) PLUGIN=0; RESTART=0 ;;
     --no-restart) RESTART=0 ;;
+    --no-open) OPEN=0 ;;
     *) echo "Unknown option: $arg" >&2; exit 2 ;;
   esac
 done
@@ -115,8 +117,10 @@ if [ "$APP" = 1 ]; then
   rm -rf "${DEST:?}"
   ditto "$TMP/unzipped/$APP_NAME.app" "$DEST"
   xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true
-  say "Opening Hermes One…"
-  open "$DEST"
+  if [ "$OPEN" = 1 ]; then
+    say "Opening Hermes One…"
+    open "$DEST"
+  fi
   note "It's in ~/Applications. Pin it to the Dock if you like."
 fi
 

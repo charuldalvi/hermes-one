@@ -23,9 +23,9 @@ jobs:
       TAG: ${{ inputs.tag || github.ref_name }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -33,7 +33,11 @@ jobs:
 
       - name: Install
         working-directory: app
-        run: npm ci
+        run: |
+          npm ci
+          # Electron fetches its app binary on first use; fetch it now for the build.
+          (cd node_modules/electron && node install.js)
+          ls node_modules/electron/dist
 
       - name: Mac, Apple silicon
         working-directory: app
