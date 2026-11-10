@@ -132,18 +132,11 @@ var tileColor = (s) => {
   return `hsl(${h % 360} 32% 42%)`;
 };
 var nameOf = (profile) => profile === "default" ? "Main agent" : profile.replace(/[-_]+/g, " ").replace(/^./, (c) => c.toUpperCase());
-var parse = (data) => {
-  if (typeof data !== "string") return data;
-  try {
-    return JSON.parse(data);
-  } catch {
-    return null;
-  }
-};
 function BrowserTab({ ctx, initial }) {
   const focused = useValue(host.state.focusedSessionProfile);
   const [profile, setProfile] = useState(initial || focused || "default");
   const [agents, setAgents] = useState([]);
+  const picked = useRef(false);
   const [state, setState] = useState("looking");
   const [tabs, setTabs] = useState([]);
   const [current, setCurrent] = useState(null);
@@ -158,7 +151,10 @@ function BrowserTab({ ctx, initial }) {
   useEffect(() => {
     let alive = true;
     const load = () => ctx.rest("/browser/agents").then((r) => {
-      if (alive) setAgents(r?.profiles ?? []);
+      if (!alive) return;
+      const list = r?.profiles ?? [];
+      setAgents(list);
+      setProfile((cur2) => !picked.current && !list.includes(cur2) && list.length ? list[0] : cur2);
     }).catch(() => {
     });
     load();
@@ -168,8 +164,14 @@ function BrowserTab({ ctx, initial }) {
       stop();
     };
   }, []);
+  const lastFrame = useRef(null);
+  const setImg = (el) => {
+    img.current = el;
+    if (el && lastFrame.current) el.src = lastFrame.current;
+  };
   const showFrame = (data) => {
-    if (img.current) img.current.src = `data:image/jpeg;base64,${data}`;
+    lastFrame.current = `data:image/jpeg;base64,${data}`;
+    if (img.current) img.current.src = lastFrame.current;
     setHasFrame(true);
   };
   const reset = () => {
@@ -177,64 +179,63 @@ function BrowserTab({ ctx, initial }) {
     setCurrent(null);
     setHasFrame(false);
     setMine(false);
+    lastFrame.current = null;
     img.current?.removeAttribute("src");
   };
   useEffect(() => {
     let alive = true;
-    let poll = null;
+    let wid = null;
     watch.current = null;
     setState("looking");
     reset();
-    const stopSocket = ctx.socket(`/browser/watch/${encodeURIComponent(profile)}`, (raw) => {
-      const m = parse(raw);
-      if (!alive || !m) return;
-      if (m.kind === "hello") {
-        watch.current = m.watch;
-        if (poll) {
-          poll();
-          poll = null;
-        }
-      } else if (m.kind === "none" || m.kind === "gone") {
-        setState("none");
-        reset();
-      } else if (m.kind === "tabs") {
-        setState("live");
-        setTabs(m.tabs);
-        setCurrent(m.current);
-        if (!m.current) {
-          setHasFrame(false);
-          setMine(false);
-          img.current?.removeAttribute("src");
-        }
-      } else if (m.kind === "nav") {
-        setNav({ url: m.url, canBack: m.canBack, canForward: m.canForward });
-        setTyping(null);
-      } else if (m.kind === "frame") showFrame(m.data);
+    const wait = (ms) => new Promise((done) => {
+      ctx.setTimeout(done, ms);
     });
-    const fallback = ctx.setTimeout(() => {
-      if (!alive || watch.current) return;
-      const snap = () => ctx.rest(`/browser/snapshot?profile=${encodeURIComponent(profile)}`).then((r) => {
-        if (!alive || watch.current) return;
-        if (!r?.running || !r.tabs?.length) {
+    const run = async () => {
+      let seq = 0;
+      while (alive) {
+        if (!wid) {
+          const r = await ctx.rest(`/browser/open/${encodeURIComponent(profile)}`, { method: "POST", timeoutMs: 2e4 }).catch(() => null);
+          if (!alive) break;
+          if (!r?.running || !r.watch) {
+            setState("none");
+            reset();
+            await wait(2e3);
+            continue;
+          }
+          wid = r.watch;
+          watch.current = wid;
+          seq = 0;
+        }
+        const p = await ctx.rest(`/browser/poll/${wid}/${seq}`, { timeoutMs: 1e4 }).catch(() => null);
+        if (!alive) break;
+        if (!p || p.gone) {
+          wid = null;
+          watch.current = null;
           setState("none");
           reset();
-          return;
+          await wait(1500);
+          continue;
         }
-        setState("snapshot");
-        setTabs(r.tabs);
-        setCurrent(r.current);
-        setNav({ url: r.url ?? "", canBack: false, canForward: false });
-        if (r.frame) showFrame(r.frame);
-      }).catch(() => {
-      });
-      snap();
-      poll = ctx.setInterval(snap, 2e3);
-    }, 5e3);
+        seq = p.seq;
+        setState("live");
+        setTabs(p.tabs ?? []);
+        setCurrent(p.current ?? null);
+        if (!p.current) {
+          setHasFrame(false);
+          setMine(false);
+          lastFrame.current = null;
+          img.current?.removeAttribute("src");
+        }
+        if (p.nav && p.nav.tab === p.current) setNav({ url: p.nav.url ?? "", canBack: !!p.nav.canBack, canForward: !!p.nav.canForward });
+        if (p.frame && p.frame.tab === p.current) showFrame(p.frame.data);
+      }
+    };
+    void run();
     return () => {
       alive = false;
-      stopSocket();
-      fallback();
-      if (poll) poll();
+      if (wid) void ctx.rest(`/browser/close/${wid}`, { method: "POST" }).catch(() => {
+      });
     };
   }, [profile]);
   const act = (a) => {
@@ -308,7 +309,10 @@ function BrowserTab({ ctx, initial }) {
     /* @__PURE__ */ jsx(Codicon, { name: "globe" }),
     /* @__PURE__ */ jsx("span", { children: "Browser" }),
     /* @__PURE__ */ jsx("span", { className: "sp" }),
-    /* @__PURE__ */ jsx("select", { className: "h1b-pick", value: profile, onChange: (e) => setProfile(e.target.value), title: "Whose browser", children: pickable.map((p) => /* @__PURE__ */ jsxs("option", { value: p, children: [
+    /* @__PURE__ */ jsx("select", { className: "h1b-pick", value: profile, onChange: (e) => {
+      picked.current = true;
+      setProfile(e.target.value);
+    }, title: "Whose browser", children: pickable.map((p) => /* @__PURE__ */ jsxs("option", { value: p, children: [
       nameOf(p),
       agents.includes(p) ? "" : " (no browser open)"
     ] }, p)) })
@@ -378,7 +382,7 @@ ${t.url}`, onClick: () => act({ type: "select", tab: t.id }), children: [
             if (text) act({ type: "text", text });
           },
           children: [
-            /* @__PURE__ */ jsx("img", { ref: img, alt: "", draggable: false, style: { visibility: hasFrame ? "visible" : "hidden" } }),
+            /* @__PURE__ */ jsx("img", { ref: setImg, alt: "", draggable: false, style: { visibility: hasFrame ? "visible" : "hidden" } }),
             !hasFrame ? /* @__PURE__ */ jsx("div", { className: "h1b-empty", style: { position: "absolute", inset: 0 }, children: /* @__PURE__ */ jsx(GlyphSpinner, {}) }) : null
           ]
         }
@@ -389,9 +393,6 @@ ${t.url}`, onClick: () => act({ type: "select", tab: t.id }), children: [
       "Your clicks and keys go to this page. ",
       name,
       " can still use it too."
-    ] }) : !live ? /* @__PURE__ */ jsxs(Fragment, { children: [
-      /* @__PURE__ */ jsx("span", { className: "h1b-dot" }),
-      "A picture every 2 seconds (this connection can't stream it live)"
     ] }) : cur?.agent ? /* @__PURE__ */ jsxs(Fragment, { children: [
       /* @__PURE__ */ jsx("span", { className: "h1b-dot run" }),
       name,

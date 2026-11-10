@@ -382,19 +382,22 @@ if APIRouter is not None:
 # (``Page.startScreencast``) and pass your clicks and keys on when you take over. They only ever talk to
 # 127.0.0.1, and only to Chromes whose profile folder lies inside one of this Hermes' homes.
 #
-#     GET  browser/agents             {profiles: [...]}  the agents with a Chrome open right now
-#     WS   browser/watch/{profile}    {kind:'hello', watch}, then {kind:'tabs'|'frame'|'nav'|'none'|'gone', ...}
-#     POST browser/act                {watch, type, ...}  select, close, follow, fit, navigate, back,
-#                                     forward, reload, mouse, key, text
-#     GET  browser/snapshot?profile=  {tabs, current, url, frame}  one picture, for when there's no socket
+# Plain requests only (no socket): Hermes may run plugin routes behind a bridge that buffers answers, and
+# remote desktops can't always hold a plugin socket. The pane polls; a poll waits up to 1.5 s for a change.
+#
+#     GET  browser/agents               {profiles: [...]}  the agents with a Chrome open right now
+#     POST browser/open/{agent}         {running, watch?}  start watching that agent's Chrome
+#     GET  browser/poll/{watch}/{seq}   {seq, tabs, current, follow, nav, frame?, gone}  what changed after seq
+#     POST browser/act                  {watch, type, ...}  select, close, follow, fit, navigate, back,
+#                                       forward, reload, mouse, key, text
+#     POST browser/close/{watch}        stop watching (an unpolled watch also stops after 20 s)
 # ---------------------------------------------------------------------------------------------
 import asyncio
+import logging
 import secrets
+import time
 
-try:
-    from fastapi import WebSocket, WebSocketDisconnect
-except ImportError:  # outside Hermes' web server
-    WebSocket = WebSocketDisconnect = None  # type: ignore[assignment,misc]
+_log = logging.getLogger("hermes_one.browser")
 
 
 def _hermes_root() -> Path:
@@ -760,30 +763,48 @@ class _BrowserWatch:
             await self.cdp.call("Input.insertText", {"text": str(a.get("text") or "")}, session)
 
 
-_WATCHES: dict[str, _BrowserWatch] = {}
+class _WatchBox:
+    """What one pane is watching: the latest tabs, address and picture, and a change counter it polls on."""
+
+    def __init__(self, profile: str):
+        self.profile = profile
+        self.watch: _BrowserWatch | None = None
+        self.seq = 0
+        self.frame_seq = 0
+        self.tabs: dict = {"tabs": [], "current": None, "follow": True}
+        self.nav: dict | None = None
+        self.frame: dict | None = None
+        self.gone = False
+        self.changed = asyncio.Event()
+        self.polled = time.monotonic()
+        self.ended: asyncio.Task | None = None
+
+    async def take(self, msg: dict):
+        kind = msg.get("kind")
+        self.seq += 1
+        if kind == "tabs":
+            self.tabs = {"tabs": msg.get("tabs") or [], "current": msg.get("current"), "follow": msg.get("follow", True)}
+        elif kind == "nav":
+            self.nav = {k: msg.get(k) for k in ("tab", "url", "canBack", "canForward")}
+        elif kind == "frame":
+            self.frame = {k: msg.get(k) for k in ("data", "width", "height", "tab")}
+            self.frame_seq = self.seq
+        self.changed.set()
 
 
-async def browser_snapshot(profile: str) -> dict:
-    """One picture of the agent's tab, plus its tabs: what the pane shows when it can't hold a socket open."""
-    browser = next((b for b in await find_browsers() if b["profile"] == profile), None)
-    if browser is None:
-        return {"running": False}
-    cdp = _Cdp(lambda *_: asyncio.sleep(0))
-    try:
-        await cdp.open(browser["port"], browser["ws_path"])
-        infos = (await cdp.call("Target.getTargets")).get("targetInfos") or []
-        pages = [t for t in infos if t.get("type") == "page" and not str(t.get("url", "")).startswith("devtools://")]
-        tabs = [{"id": t["targetId"], "title": t.get("title") or t.get("url", ""), "url": t.get("url", ""), "agent": bool(t.get("attached"))} for t in pages]
-        if not pages:
-            return {"running": True, "tabs": [], "current": None}
-        target = next((t for t in pages if t.get("attached")), pages[-1])
-        session = (await cdp.call("Target.attachToTarget", {"targetId": target["targetId"], "flatten": True}))["sessionId"]
-        shot = await cdp.call("Page.captureScreenshot", {"format": "jpeg", "quality": 70}, session, timeout=15.0)
-        return {"running": True, "tabs": tabs, "current": target["targetId"], "url": target.get("url", ""), "frame": shot.get("data", "")}
-    except Exception as exc:
-        return {"running": True, "error": str(exc)}
-    finally:
-        await cdp.close()
+_BOXES: dict[str, _WatchBox] = {}
+
+
+async def _sweep():
+    """Stop watches nobody polls any more (a closed pane, a window that went away)."""
+    now = time.monotonic()
+    for wid, box in list(_BOXES.items()):
+        if now - box.polled > 20:
+            _BOXES.pop(wid, None)
+            if box.watch is not None:
+                await box.watch.stop()
+            if box.ended is not None:
+                box.ended.cancel()
 
 
 if APIRouter is not None:
@@ -792,69 +813,75 @@ if APIRouter is not None:
     async def browser_agents():
         return JSONResponse({"profiles": sorted({b["profile"] for b in await find_browsers()})}, headers=_NO_STORE)
 
-    @router.get("/browser/snapshot")
-    async def browser_snapshot_route(profile: str = "default"):
-        return JSONResponse(await browser_snapshot(profile), headers=_NO_STORE)
+    # Never name a route parameter "profile": Hermes reads that name as the profile to run the request under
+    # (a profile where this plugin is off answers 404 "Plugin not found").
+    @router.post("/browser/open/{agent}")
+    async def browser_open(agent: str):
+        profile = agent
+        await _sweep()
+        browser = next((b for b in await find_browsers() if b["profile"] == profile), None)
+        if browser is None:
+            return JSONResponse({"running": False}, headers=_NO_STORE)
+        box = _WatchBox(profile)
+        watch = _BrowserWatch(browser, box.take)
+        box.watch = watch
+        try:
+            await asyncio.wait_for(watch.start(), 15)
+        except Exception as exc:
+            _log.warning("browser watch for %s didn't start: %s", profile, exc)
+            await watch.stop()
+            return _error(502, "browser/failed", f"Couldn't open the agent's browser: {exc}")
+
+        async def ended():
+            await watch.cdp.closed.wait()
+            box.gone = True
+            box.changed.set()
+
+        box.ended = asyncio.create_task(ended())
+        wid = secrets.token_urlsafe(12)
+        _BOXES[wid] = box
+        return JSONResponse({"running": True, "watch": wid}, headers=_NO_STORE)
+
+    @router.get("/browser/poll/{watch_id}/{seq}")
+    async def browser_poll(watch_id: str, seq: int):
+        box = _BOXES.get(watch_id)
+        if box is None:
+            return _error(404, "browser/gone", "That browser view has closed. Open it again.")
+        box.polled = time.monotonic()
+        if box.seq <= seq and not box.gone:
+            box.changed.clear()
+            try:
+                await asyncio.wait_for(box.changed.wait(), 1.5)
+            except asyncio.TimeoutError:
+                pass
+        box.polled = time.monotonic()
+        out = {"seq": box.seq, **box.tabs, "nav": box.nav, "gone": box.gone}
+        if box.frame is not None and box.frame_seq > seq:
+            out["frame"] = box.frame
+        if box.gone:
+            _BOXES.pop(watch_id, None)
+            if box.watch is not None:
+                await box.watch.stop()
+        return JSONResponse(out, headers=_NO_STORE)
 
     @router.post("/browser/act")
     async def browser_act(request: Request):
         body = await _body(request)
-        watch = _WATCHES.get(str(body.get("watch") or ""))
-        if watch is None:
+        box = _BOXES.get(str(body.get("watch") or ""))
+        if box is None or box.watch is None:
             return _error(404, "browser/gone", "That browser view has closed. Open it again.")
         try:
-            await watch.act(body)
+            await box.watch.act(body)
         except Exception as exc:
             return _error(502, "browser/failed", f"The browser didn't take that: {exc}")
         return {"ok": True}
 
-    @router.websocket("/browser/watch")
-    @router.websocket("/browser/watch/{profile}")
-    async def browser_watch(ws: WebSocket, profile: str = ""):
-        """Stays open while the pane is: waits for the agent's Chrome, streams it, waits again if it closes."""
-        await ws.accept()
-        profile = profile or ws.query_params.get("profile") or "default"
-        watch_id = secrets.token_urlsafe(12)
-        lock = asyncio.Lock()
-
-        async def send(frame: dict):
-            async with lock:
-                await ws.send_json(frame)
-
-        async def client_gone():
-            try:
-                while True:
-                    await ws.receive_text()
-            except Exception:
-                return
-
-        gone = asyncio.create_task(client_gone())
-        watch: _BrowserWatch | None = None
-        try:
-            await send({"kind": "hello", "watch": watch_id})
-            while not gone.done():
-                browser = next((b for b in await find_browsers() if b["profile"] == profile), None)
-                if browser is None:
-                    await send({"kind": "none"})
-                    await asyncio.wait({gone}, timeout=2.0)
-                    continue
-                watch = _BrowserWatch(browser, send)
-                _WATCHES[watch_id] = watch
-                closed = asyncio.ensure_future(watch.cdp.closed.wait())
-                try:
-                    await watch.start()
-                    await asyncio.wait({gone, closed}, return_when=asyncio.FIRST_COMPLETED)
-                except Exception:
-                    pass
-                finally:
-                    closed.cancel()
-                    _WATCHES.pop(watch_id, None)
-                    await watch.stop()
-                if not gone.done():
-                    await send({"kind": "gone"})
-                    await asyncio.wait({gone}, timeout=2.0)
-        except Exception:
-            pass
-        finally:
-            gone.cancel()
-            _WATCHES.pop(watch_id, None)
+    @router.post("/browser/close/{watch_id}")
+    async def browser_close(watch_id: str):
+        box = _BOXES.pop(watch_id, None)
+        if box is not None:
+            if box.watch is not None:
+                await box.watch.stop()
+            if box.ended is not None:
+                box.ended.cancel()
+        return {"ok": True}

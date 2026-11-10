@@ -5,7 +5,7 @@
 // - The agent's browser: the agent's own Chrome as a small browser in a workspace tab. It shows the agent's
 //   tabs (closable, the agent's marked and followed), the address, and the page live; Take over sends your
 //   clicks and keys to it. The plugin's backend (dashboard/plugin_api.py, browser/*) finds that Chrome
-//   wherever Hermes runs and streams it. The tab opens by itself when the agent in the chat you're looking
+//   wherever Hermes runs; the pane polls it for each change. The tab opens by itself when the agent in the chat you're looking
 //   at starts browsing, and stays shut for a while once you close it.
 //
 // Source of desktop/plugin.js: `npm run build` bundles this file (React and the SDK stay external).
@@ -101,13 +101,13 @@ const MOD = (e) => (e.altKey ? 1 : 0) | (e.ctrlKey ? 2 : 0) | (e.metaKey ? 4 : 0
 const hostOf = (url) => { try { return new URL(url).host } catch { return '' } }
 const tileColor = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return `hsl(${h % 360} 32% 42%)` }
 const nameOf = (profile) => (profile === 'default' ? 'Main agent' : profile.replace(/[-_]+/g, ' ').replace(/^./, (c) => c.toUpperCase()))
-const parse = (data) => { if (typeof data !== 'string') return data; try { return JSON.parse(data) } catch { return null } }
 
 function BrowserTab({ ctx, initial }) {
   const focused = useValue(host.state.focusedSessionProfile)
   const [profile, setProfile] = useState(initial || focused || 'default')
   const [agents, setAgents] = useState([])
-  const [state, setState] = useState('looking') // looking | none | live | snapshot
+  const picked = useRef(false) // you chose an agent in the picker: stay on it
+  const [state, setState] = useState('looking') // looking | none | live
   const [tabs, setTabs] = useState([])
   const [current, setCurrent] = useState(null)
   const [nav, setNav] = useState({ url: '', canBack: false, canForward: false })
@@ -122,44 +122,53 @@ function BrowserTab({ ctx, initial }) {
   // Which agents have a browser open (for the picker).
   useEffect(() => {
     let alive = true
-    const load = () => ctx.rest('/browser/agents').then((r) => { if (alive) setAgents(r?.profiles ?? []) }).catch(() => {})
+    const load = () => ctx.rest('/browser/agents').then((r) => {
+      if (!alive) return
+      const list = r?.profiles ?? []
+      setAgents(list)
+      // The agent you're talking to isn't browsing but another one is (it handed the work on): show that one.
+      setProfile((cur) => (!picked.current && !list.includes(cur) && list.length ? list[0] : cur))
+    }).catch(() => {})
     load()
     const stop = ctx.setInterval(load, 5000)
     return () => { alive = false; stop() }
   }, [])
 
-  const showFrame = (data) => { if (img.current) img.current.src = `data:image/jpeg;base64,${data}`; setHasFrame(true) }
-  const reset = () => { setTabs([]); setCurrent(null); setHasFrame(false); setMine(false); img.current?.removeAttribute('src') }
+  // The latest picture is kept, so the first one shows even when it arrives before the page view is drawn.
+  const lastFrame = useRef(null)
+  const setImg = (el) => { img.current = el; if (el && lastFrame.current) el.src = lastFrame.current }
+  const showFrame = (data) => { lastFrame.current = `data:image/jpeg;base64,${data}`; if (img.current) img.current.src = lastFrame.current; setHasFrame(true) }
+  const reset = () => { setTabs([]); setCurrent(null); setHasFrame(false); setMine(false); lastFrame.current = null; img.current?.removeAttribute('src') }
 
-  // Stream the agent's Chrome over the plugin's socket; without a socket (some remote setups), a picture every 2 s.
+  // Watch the agent's Chrome by asking the plugin's backend for what changed (each ask waits up to 1.5 s for a
+  // change, so the page moves live). Plain requests work everywhere Hermes runs, local or remote.
   useEffect(() => {
     let alive = true
-    let poll = null
+    let wid = null
     watch.current = null
     setState('looking'); reset()
-    const stopSocket = ctx.socket(`/browser/watch/${encodeURIComponent(profile)}`, (raw) => {
-      const m = parse(raw)
-      if (!alive || !m) return
-      if (m.kind === 'hello') { watch.current = m.watch; if (poll) { poll(); poll = null } }
-      else if (m.kind === 'none' || m.kind === 'gone') { setState('none'); reset() }
-      else if (m.kind === 'tabs') {
-        setState('live'); setTabs(m.tabs); setCurrent(m.current)
-        if (!m.current) { setHasFrame(false); setMine(false); img.current?.removeAttribute('src') }
-      } else if (m.kind === 'nav') { setNav({ url: m.url, canBack: m.canBack, canForward: m.canForward }); setTyping(null) }
-      else if (m.kind === 'frame') showFrame(m.data)
-    })
-    const fallback = ctx.setTimeout(() => {
-      if (!alive || watch.current) return
-      const snap = () => ctx.rest(`/browser/snapshot?profile=${encodeURIComponent(profile)}`).then((r) => {
-        if (!alive || watch.current) return
-        if (!r?.running || !r.tabs?.length) { setState('none'); reset(); return }
-        setState('snapshot'); setTabs(r.tabs); setCurrent(r.current); setNav({ url: r.url ?? '', canBack: false, canForward: false })
-        if (r.frame) showFrame(r.frame)
-      }).catch(() => {})
-      snap()
-      poll = ctx.setInterval(snap, 2000)
-    }, 5000)
-    return () => { alive = false; stopSocket(); fallback(); if (poll) poll() }
+    const wait = (ms) => new Promise((done) => { ctx.setTimeout(done, ms) })
+    const run = async () => {
+      let seq = 0
+      while (alive) {
+        if (!wid) {
+          const r = await ctx.rest(`/browser/open/${encodeURIComponent(profile)}`, { method: 'POST', timeoutMs: 20000 }).catch(() => null)
+          if (!alive) break
+          if (!r?.running || !r.watch) { setState('none'); reset(); await wait(2000); continue }
+          wid = r.watch; watch.current = wid; seq = 0
+        }
+        const p = await ctx.rest(`/browser/poll/${wid}/${seq}`, { timeoutMs: 10000 }).catch(() => null)
+        if (!alive) break
+        if (!p || p.gone) { wid = null; watch.current = null; setState('none'); reset(); await wait(1500); continue }
+        seq = p.seq
+        setState('live'); setTabs(p.tabs ?? []); setCurrent(p.current ?? null)
+        if (!p.current) { setHasFrame(false); setMine(false); lastFrame.current = null; img.current?.removeAttribute('src') }
+        if (p.nav && p.nav.tab === p.current) setNav({ url: p.nav.url ?? '', canBack: !!p.nav.canBack, canForward: !!p.nav.canForward })
+        if (p.frame && p.frame.tab === p.current) showFrame(p.frame.data)
+      }
+    }
+    void run()
+    return () => { alive = false; if (wid) void ctx.rest(`/browser/close/${wid}`, { method: 'POST' }).catch(() => {}) }
   }, [profile])
 
   const act = (a) => { if (watch.current) void ctx.rest('/browser/act', { method: 'POST', body: { watch: watch.current, ...a } }).catch(() => {}) }
@@ -217,7 +226,7 @@ function BrowserTab({ ctx, initial }) {
       <Codicon name="globe" />
       <span>Browser</span>
       <span className="sp" />
-      <select className="h1b-pick" value={profile} onChange={(e) => setProfile(e.target.value)} title="Whose browser">
+      <select className="h1b-pick" value={profile} onChange={(e) => { picked.current = true; setProfile(e.target.value) }} title="Whose browser">
         {pickable.map((p) => <option key={p} value={p}>{nameOf(p)}{agents.includes(p) ? '' : ' (no browser open)'}</option>)}
       </select>
     </div>
@@ -264,13 +273,12 @@ function BrowserTab({ ctx, initial }) {
         <div className={`h1b-page${mine ? ' mine' : ''}`} ref={surface} tabIndex={0}
           onMouseDown={mouse('mousePressed')} onMouseUp={mouse('mouseReleased')} onMouseMove={mouse('mouseMoved')} onContextMenu={(e) => { if (mine) e.preventDefault() }}
           onKeyDown={key('keyDown')} onKeyUp={key('keyUp')} onPaste={(e) => { if (!mine) return; e.preventDefault(); const text = e.clipboardData.getData('text'); if (text) act({ type: 'text', text }) }}>
-          <img ref={img} alt="" draggable={false} style={{ visibility: hasFrame ? 'visible' : 'hidden' }} />
+          <img ref={setImg} alt="" draggable={false} style={{ visibility: hasFrame ? 'visible' : 'hidden' }} />
           {!hasFrame ? <div className="h1b-empty" style={{ position: 'absolute', inset: 0 }}><GlyphSpinner /></div> : null}
         </div>
       </div>
       <div className="h1b-foot">
         {mine ? <><span className="h1b-dot ok" />Your clicks and keys go to this page. {name} can still use it too.</>
-          : !live ? <><span className="h1b-dot" />A picture every 2 seconds (this connection can't stream it live)</>
           : cur?.agent ? <><span className="h1b-dot run" />{name} is working in this tab</>
           : <><span className="h1b-dot" />{tabs.some((t) => t.agent) ? `${name} is in another tab` : `${name}’s browser`}{tabs.some((t) => t.agent) ? <Button size="xs" variant="ghost" onClick={() => act({ type: 'follow' })}>Follow {name}</Button> : null}</>}
       </div>
