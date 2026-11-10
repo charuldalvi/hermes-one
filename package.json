@@ -1,0 +1,13 @@
+{
+  "name": "hermes-one-plugin",
+  "private": true,
+  "description": "Builds desktop/plugin.js (the plugin's Hermes Desktop half) from desktop-src/.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild desktop-src/plugin.jsx --bundle --format=esm --jsx=automatic --target=es2022 --external:@hermes/plugin-sdk --external:react --external:react/jsx-runtime --legal-comments=none --outfile=desktop/plugin.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.12"
+  }
+}

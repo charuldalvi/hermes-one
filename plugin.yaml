@@ -1,7 +1,7 @@
 name: hermes-one
 label: Hermes One
 kind: standalone
-version: "0.6.2"
+version: "0.7.0"
 author: Charul Dalvi
 description: >
   Agent tools for the Hermes One app. Quicksilver can add an agent (create_agent), keeps the agents

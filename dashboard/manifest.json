@@ -1,9 +1,9 @@
 {
   "name": "hermes-one",
   "label": "Hermes One",
-  "description": "Hermes One's apps over Hermes' own API, for other clients such as a phone app. No dashboard page.",
+  "description": "Hermes One's apps and the agent's browser over Hermes' own API, for Hermes Desktop and other clients. No dashboard page.",
   "icon": "AppWindow",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "tab": { "hidden": true },
   "entry": "dist/index.js",
   "api": "plugin_api.py"
