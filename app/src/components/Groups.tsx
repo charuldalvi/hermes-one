@@ -126,8 +126,8 @@ export function GroupsSection() {
     <>
       <div className="lab"><span>Groups</span>
         <span className="gacts">
-          <button className="garr" disabled={connection !== 'open' || bots < 2} title="Quicksilver sorts the agents into groups by craft, like a film crew or a research desk" onClick={() => void arrangeTeam({ asked: true })}>
-            <Icon name="spark" size={12} />Let Quicksilver arrange</button>
+          <button className="garr" disabled={connection !== 'open' || bots < 2} title="Hermes sorts the agents into groups by craft, like a film crew or a research desk" onClick={() => void arrangeTeam({ asked: true })}>
+            <Icon name="spark" size={12} />Let Hermes arrange</button>
           <button className="garr gadd" disabled={connection !== 'open'} title="New group" aria-label="New group" onClick={() => setCreating(true)}><Icon name="plus" size={13} /></button>
         </span></div>
       {rooms.map((r) => <GroupRow key={r.room_id} room={r} on={panel === `group:${r.room_id}`} />)}
@@ -229,7 +229,7 @@ function Files({ roomId, event, canDownload }: { roomId: string; event: RoomEven
   )
 }
 
-/** The colour an @name is shown in: the agent's own bead colour; Quicksilver and @everyone in the accent blue.
+/** The colour an @name is shown in: the agent's own bead colour; Hermes and @everyone in the accent blue.
  *  Undefined when the name isn't in the group (it stays plain text). */
 function mentionColor(handle: string, members: RoomMember[]): string | undefined {
   const h = handle.toLowerCase().replace(/[.]+$/, '')
@@ -867,8 +867,8 @@ export function NewGroupDialog({ open, onClose, onCreated }: { open: boolean; on
   const sorted = useMemo(() => [...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))), [bots])
   const seatable = caps?.seatable_profiles ? new Set(caps.seatable_profiles) : null
   const chosen = picked.map((p) => sorted.find((b) => b.profile === p)).filter((b): b is Bot => !!b)
-  const autoName = chosen.map((b) => (b.isChief ? 'Quicksilver' : b.name)).join(' & ').slice(0, 200)
-  const roster: RoomMember[] = chosen.map((b) => ({ member_id: b.profile, profile: b.profile, handle: b.profile, display_name: b.isChief ? 'Quicksilver' : b.name }))
+  const autoName = chosen.map((b) => (b.isChief ? 'Hermes' : b.name)).join(' & ').slice(0, 200)
+  const roster: RoomMember[] = chosen.map((b) => ({ member_id: b.profile, profile: b.profile, handle: b.profile, display_name: b.isChief ? 'Hermes' : b.name }))
   const leadPicked = route.startsWith('lead:') ? route.slice(5) : ''
   useEffect(() => { if (leadPicked && !picked.includes(leadPicked)) setRoute('everyone') }, [picked, leadPicked])
   const driverOff = caps?.driver === false
@@ -894,7 +894,7 @@ export function NewGroupDialog({ open, onClose, onCreated }: { open: boolean; on
         <p className="free" style={{ margin: 0 }}>A group is a room where a few agents work on something together. You write to the room; they answer in turn and build on each other.</p>
         {driverOff ? <div className="errline" style={{ margin: 0 }}><i className="dot need" /><span>Groups aren’t running in Hermes right now. Restart Hermes, then try again.</span></div> : null}
         <label><span>Name</span><input className="answer" value={name} maxLength={200} autoFocus placeholder={autoName || 'Spring launch'} onChange={(e) => setName(e.target.value)} /></label>
-        <div className="gpicklab"><span>Who’s in it</span><em>Quicksilver can join too</em></div>
+        <div className="gpicklab"><span>Who’s in it</span><em>Hermes can join too</em></div>
         <div className="gpick">
           {sorted.map((b) => {
             const on = picked.includes(b.profile)
@@ -904,12 +904,12 @@ export function NewGroupDialog({ open, onClose, onCreated }: { open: boolean; on
               <button key={b.profile} className={`gpr${on ? ' on' : ''}`} disabled={blocked || full} onClick={() => toggle(b.profile)} aria-pressed={on}
                 title={blocked ? 'This agent can’t join groups right now' : full ? 'Six agents at most' : undefined}>
                 <BotFace profile={b.profile} size={30} poseKey={b.poseKey} watch={false} mood={on ? 'hop' : 'idle'} />
-                <span className="tx"><span className="t1">{b.isChief ? 'Quicksilver' : b.name}</span><span className="t2">{blocked ? 'Can’t join groups right now' : b.isChief ? 'Leads your agents' : b.role || 'One of your agents'}</span></span>
+                <span className="tx"><span className="t1">{b.isChief ? 'Hermes' : b.name}</span><span className="t2">{blocked ? 'Can’t join groups right now' : b.isChief ? 'Leads your agents' : b.role || 'One of your agents'}</span></span>
                 <span className="gcheck">{on ? <Icon name="check" size={12} /> : null}</span>
               </button>
             )
           })}
-          {!sorted.length ? <p className="free">No agents yet. Ask Quicksilver to add some.</p> : null}
+          {!sorted.length ? <p className="free">No agents yet. Ask Hermes to add some.</p> : null}
         </div>
         <div className="glabel"><span>Who answers a message that names nobody</span>
           <RoutingPicker members={roster} value={route} onChange={setRoute} disabled={chosen.length < 2} /></div>

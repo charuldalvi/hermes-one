@@ -11,7 +11,7 @@ import '../../styles/capabilities.css'
 /** "Chief" for the default profile, else the bot's name. */
 export function useBotName(profile: string): string {
   const bots = useStore((s) => s.bots)
-  if (profile === 'default') return 'Quicksilver'
+  if (profile === 'default') return 'Hermes'
   return bots.find((b) => b.profile === profile)?.name ?? profile
 }
 

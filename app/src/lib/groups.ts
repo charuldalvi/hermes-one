@@ -368,18 +368,18 @@ export function stopGroups() { if (timer) clearInterval(timer); timer = null; st
 const uuid = () => crypto.randomUUID()
 const RESERVED_HANDLES = new Set(['all', 'everyone'])
 
-/** The roster groups.create receives (Quicksilver, the lead, first). Each agent answers to @its-profile; the lead to @quicksilver.
+/** The roster groups.create receives (Hermes, the lead, first). Each agent answers to @its-profile; the lead to @hermes.
  *  Handles are unique and never the reserved @all / @everyone. */
 export function rosterFor(bots: Pick<Bot, 'profile' | 'name' | 'isChief'>[]): RoomMember[] {
   const profiles = new Set(bots.map((b) => b.profile.toLowerCase()))
   const taken = new Set<string>()
   const ordered = [...bots.filter((b) => b.isChief), ...bots.filter((b) => !b.isChief)]
   return ordered.map((b) => {
-    let handle = b.isChief && !profiles.has('quicksilver') ? 'quicksilver' : b.profile
+    let handle = b.isChief && !profiles.has('hermes') ? 'hermes' : b.profile
     if (RESERVED_HANDLES.has(handle.toLowerCase())) handle = `${handle}-agent`
     while (taken.has(handle.toLowerCase())) handle = `${handle}-2`
     taken.add(handle.toLowerCase())
-    const display = b.isChief ? 'Quicksilver' : b.name
+    const display = b.isChief ? 'Hermes' : b.name
     return { member_id: b.profile, profile: b.profile, handle, ...(display ? { display_name: display.slice(0, 200) } : {}), target: { kind: 'local', profile: b.profile } }
   })
 }

@@ -68,7 +68,7 @@ export function BlueprintGallery({ open, onClose, initialProfile = 'default', on
     } catch (e) { setError(errText(e).replace(/^\d+:\s*/, '')) } finally { setSaving(false) }
   }
 
-  const botOptions: Option[] = [...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))).map((b) => ({ value: b.profile, label: b.isChief ? 'Quicksilver' : b.name, icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} /> }))
+  const botOptions: Option[] = [...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))).map((b) => ({ value: b.profile, label: b.isChief ? 'Hermes' : b.name, icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} /> }))
   return (
     <Dialog open={open} onClose={() => { if (!saving) onClose() }} wide width={880}
       title={pick ? <><button className="hbtn" onClick={() => setPick(null)} aria-label="Back"><Icon name="chevR" size={16} style={{ transform: "rotate(180deg)" }} /></button><span>{pick.title}</span></> : 'Start from a blueprint'}
@@ -81,7 +81,7 @@ export function BlueprintGallery({ open, onClose, initialProfile = 'default', on
         {!pick ? <Search value={q} onChange={setQ} placeholder="Search blueprints" /> : null}
         <div className="pp"><span className="pl">For</span>
           <Select value={profile} options={botOptions} onChange={(p) => { setProfile(p); setPick(null) }} width={300} align="end"
-            render={(o) => <>{o?.icon}<span className="sv">{o?.label ?? 'Quicksilver'}</span></>} />
+            render={(o) => <>{o?.icon}<span className="sv">{o?.label ?? 'Hermes'}</span></>} />
         </div>
       </div>
       {pick ? (

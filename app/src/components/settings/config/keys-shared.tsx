@@ -40,7 +40,7 @@ export const isKeyVar = (info: EnvInfo) => info.is_password || /(?:_API_KEY|_TOK
 export function useBotName(profile: string): string {
   const bots = useStore((s) => s.bots)
   const b = bots.find((x) => x.profile === profile)
-  if (profile === 'default' || b?.isChief) return 'Quicksilver'
+  if (profile === 'default' || b?.isChief) return 'Hermes'
   return b?.name ?? profile
 }
 

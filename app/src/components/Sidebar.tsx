@@ -69,7 +69,7 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
   const panelOpen = !!panel && panel !== '__needs' && !isWorkKey(panel)
   const chatWith = useStore((s) => s.chatWith)
   const chiefOn = view === 'chat' && !panelOpen && chatWith === 'default'
-  const chief: Bot = { ...(chiefBot ?? { profile: 'default', isChief: true, online: true, status: 'free' as const }), name: 'Quicksilver', role: 'Leads your agents. Talk to Quicksilver here.',
+  const chief: Bot = { ...(chiefBot ?? { profile: 'default', isChief: true, online: true, status: 'free' as const }), name: 'Hermes', role: 'Leads your agents. Talk to Hermes here.',
     ...(chiefBusy ? { status: 'working' as const, since: chiefSince } : {}) }
   const needN = useRef<HTMLSpanElement>(null)
   const lastCount = useRef(pending.length)
@@ -110,11 +110,11 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
           <Icon name="search" size={13} /><kbd>⌘K</kbd>
         </button>
       </div>
-      <button className={`chiefhero nodrag${chiefOn ? ' on' : ''}`} title="Quicksilver leads your agents. Talk to Quicksilver here."
+      <button className={`chiefhero nodrag${chiefOn ? ' on' : ''}`} title="Hermes leads your agents. Talk to Hermes here."
         onClick={() => openChat('default')}>
         <BotFace profile="default" size={64} mood={botMood(chief, 64, pending)} poseKey={chief.poseKey} />
         <span className="ch-tx">
-          <span className="ch-n">Quicksilver</span>
+          <span className="ch-n">Hermes</span>
           <span className="ch-s">{chiefNeeds ? <><i className="dot need" />Needs you</> : chiefBusy ? <><i className="dot run" />Working · {elapsed(chiefSince)}</> : 'Leads your agents · Free'}</span>
         </span>
       </button>
@@ -133,7 +133,7 @@ export function Sidebar({ onQuick }: { onQuick: () => void }) {
             </button>
           )
         })}
-        {!team.length && connection === 'open' ? <div className="lab" style={{ height: 'auto', paddingTop: 4 }}>No agents yet. Ask Quicksilver to add one.</div> : null}
+        {!team.length && connection === 'open' ? <div className="lab" style={{ height: 'auto', paddingTop: 4 }}>No agents yet. Ask Hermes to add one.</div> : null}
         <GroupsSection />
       </div>
       <nav className="pinpages nodrag" aria-label="Pages" ref={pinned}

@@ -32,7 +32,7 @@ function JobRow({ job, starting, busy, actions, onOpen }: { job: CronJob; starti
       <BotFace profile={job.profile} size={30} poseKey={bot?.poseKey} mood={running ? 'writing' : st === 'paused' || st === 'completed' ? 'doze' : failed ? 'hand' : 'idle'} watch={false} />
       <div className="tx">
         <div className="t1"><span>{jobTitle(job)}</span><StateBadge job={job} starting={starting} />{isScriptOnly(job) ? <span className="badge quiet">Script</span> : null}</div>
-        <div className="t2">{bot ? (bot.isChief ? 'Quicksilver' : bot.name) : prettyName(job.profile)} · {scheduleWords(job)}{next ? ` · ${next}` : ''}</div>
+        <div className="t2">{bot ? (bot.isChief ? 'Hermes' : bot.name) : prettyName(job.profile)} · {scheduleWords(job)}{next ? ` · ${next}` : ''}</div>
         {failed && job.last_error ? <div className="sy-err" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={job.last_error}>{errorSummary(job.last_error)}</div>
           : job.last_delivery_error ? <div className="sy-err" title={job.last_delivery_error}>The result didn’t arrive: {errorSummary(job.last_delivery_error)}</div>
           : job.last_run_at && st !== 'completed' ? <div className="t3" style={{ fontFamily: 'inherit' }}>Last ran {ago(job.last_run_at)}{job.last_status === 'ok' ? ', went fine' : ''}</div> : null}
@@ -162,7 +162,7 @@ export function ScheduledPage({ profile }: { profile: string }) {
 
   const botsWithJobs = new Set(jobs.map((j) => j.profile))
   const botOptions: Option[] = [{ value: 'all', label: 'All agents' }, ...[...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))).filter((b) => botsWithJobs.has(b.profile)).map((b) => ({
-    value: b.profile, label: b.isChief ? 'Quicksilver' : b.name, icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} />, hint: String(jobs.filter((j) => j.profile === b.profile).length),
+    value: b.profile, label: b.isChief ? 'Hermes' : b.name, icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} />, hint: String(jobs.filter((j) => j.profile === b.profile).length),
   }))]
   const late = jobs.filter(overdue)
   const openJob = openKey ? jobs.find((j) => jobKey(j) === openKey) ?? null : null
@@ -201,7 +201,7 @@ export function ScheduledPage({ profile }: { profile: string }) {
       ) : null}
 
       {loading && !data ? <div className="empty"><Spinner size={18} /><span>Looking at every agent’s jobs…</span></div>
-        : data && !jobs.length ? <Empty title="No scheduled jobs yet" body="Make one here, start from a blueprint, or just ask Quicksilver, like “every morning at 8, tell me the weather”." />
+        : data && !jobs.length ? <Empty title="No scheduled jobs yet" body="Make one here, start from a blueprint, or just ask Hermes, like “every morning at 8, tell me the weather”." />
         : data && !shown.length ? <div className="empty"><b>Nothing matches</b><span>Try another search or filter.</span></div>
         : sections.map((s, i) => (
           <Fragment key={s.key}>

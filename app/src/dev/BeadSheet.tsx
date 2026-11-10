@@ -18,7 +18,7 @@ export function showBeadSheet() {
           <div style={{ position: 'relative', width: 112, height: 112 }}><BotFace profile={bot.profile} size={112} mood={mood} poseKey={bot.poseKey} watch={false} /></div>
         </div>
       )))}
-      <pre id="bead-order" style={{ position: 'absolute', left: 0, top: 4 * CELL, color: '#000', font: '12px monospace' }}>{JSON.stringify(bots.map((b) => ({ profile: b.profile, name: b.isChief ? 'Quicksilver' : b.name, role: b.role ?? '' })))}</pre>
+      <pre id="bead-order" style={{ position: 'absolute', left: 0, top: 4 * CELL, color: '#000', font: '12px monospace' }}>{JSON.stringify(bots.map((b) => ({ profile: b.profile, name: b.isChief ? 'Hermes' : b.name, role: b.role ?? '' })))}</pre>
     </div>,
   )
 }

@@ -49,7 +49,7 @@ function PeopleTab({ list, plats, onApprove, onRevoke, onClear }: { list: { pend
 export function MessagingPage({ profile }: { profile: string }) {
   const bots = useStore((s) => s.bots)
   const bot = bots.find((b) => b.profile === profile)
-  const who = bot ? (bot.isChief ? 'Quicksilver' : bot.name) : prettyName(profile)
+  const who = bot ? (bot.isChief ? 'Hermes' : bot.name) : prettyName(profile)
   const [tab, setTab] = useState<Tab>('apps')
   const plat = useAsync(() => platforms(profile), [profile])
   const pair = useAsync(() => pairing(profile).catch(() => ({ pending: [], approved: [] })), [profile])

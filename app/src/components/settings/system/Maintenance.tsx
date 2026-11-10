@@ -50,7 +50,7 @@ function HookDialog({ open, onClose, events, onAdd }: { open: boolean; onClose: 
 
 export function MaintenanceTab({ profile }: { profile: string }) {
   const bots = useStore((s) => s.bots)
-  const who = profile === 'default' ? 'Quicksilver' : bots.find((b) => b.profile === profile)?.name ?? prettyName(profile)
+  const who = profile === 'default' ? 'Hermes' : bots.find((b) => b.profile === profile)?.name ?? prettyName(profile)
   const { runs, start, clear } = useActions()
   const cps = useAsync(() => checkpoints(profile), [profile])
   const hk = useAsync(() => hooks(profile), [profile])
@@ -105,7 +105,7 @@ export function MaintenanceTab({ profile }: { profile: string }) {
     try { const r = await setMetricsConsent(profile, on); metrics.setData((m) => (m ? { ...m, ...r } : m)); toast(on ? 'Thanks. Anonymous numbers are shared.' : 'Nothing is shared any more') } catch (e) { metrics.setData(before); toast(`Couldn’t change it: ${errText(e)}`) }
   }
 
-  const exportOpts: Option[] = [...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))).map((b) => ({ value: b.profile, label: b.isChief ? 'Quicksilver' : b.name, icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} /> }))
+  const exportOpts: Option[] = [...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))).map((b) => ({ value: b.profile, label: b.isChief ? 'Hermes' : b.name, icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} /> }))
   const c = cur.data
   return (
     <>

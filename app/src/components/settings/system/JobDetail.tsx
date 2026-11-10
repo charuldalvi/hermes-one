@@ -118,7 +118,7 @@ export function JobDetail({ job, open, onClose, actions, starting }: { job: Cron
 
       <div className="card">
         <dl className="sy-kv">
-          <dt>Agent</dt><dd>{bot ? (bot.isChief ? 'Quicksilver' : bot.name) : prettyName(j.profile)}</dd>
+          <dt>Agent</dt><dd>{bot ? (bot.isChief ? 'Hermes' : bot.name) : prettyName(j.profile)}</dd>
           <dt>When</dt><dd>{scheduleWords(j)}{j.timezone ? <span className="sy-dim"> · {j.timezone}</span> : null}</dd>
           <dt>Next run</dt><dd>{paused ? `Paused${j.paused_reason ? `: ${j.paused_reason}` : ''}` : st === 'completed' ? 'Won’t run again' : j.next_run_at ? <>{when(j.next_run_at)} <span className="sy-dim">({ago(j.next_run_at)})</span></> : '—'}</dd>
           <dt>Last run</dt><dd>{j.last_run_at ? <>{when(j.last_run_at)} · {failedLast(j) ? <span className="sy-err">failed</span> : j.last_status === 'ok' ? 'went fine' : (j.last_status ?? '').replace(/_/g, ' ') || 'finished'}</> : 'Hasn’t run yet'}</dd>

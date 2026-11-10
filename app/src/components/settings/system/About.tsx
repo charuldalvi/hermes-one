@@ -62,7 +62,7 @@ export function AboutTab() {
           return (
             <div className="srow" key={p.name}>
               <BotFace profile={p.name} size={22} poseKey={b?.poseKey} watch={false} />
-              <div className="tx"><div className="t1"><span>{p.is_default ? 'Quicksilver' : b?.name ?? prettyName(p.name, p.display_name)}</span></div><div className="t3">{p.path}</div></div>
+              <div className="tx"><div className="t1"><span>{p.is_default ? 'Hermes' : b?.name ?? prettyName(p.name, p.display_name)}</span></div><div className="t3">{p.path}</div></div>
               <button className="hbtn" title="Copy the path" onClick={() => void copy(p.path, 'Copied the path')}><Icon name="copy" size={14} /></button>
               <button className="b-text" onClick={() => reveal(p.path)}>Show</button>
             </div>

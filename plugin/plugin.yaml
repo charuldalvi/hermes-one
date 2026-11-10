@@ -1,12 +1,12 @@
 name: hermes-one
 label: Hermes One
 kind: standalone
-version: "0.7.0"
+version: "0.7.1"
 author: Charul Dalvi
 description: >
-  Agent tools for the Hermes One app. Quicksilver can add an agent (create_agent), keeps the agents
+  Agent tools for the Hermes One app. Hermes can add an agent (create_agent), keeps the agents
   arranged in groups by craft (list_agents, arrange_groups), and can form or change one-off
-  groups (create_group, update_group, list_groups). Quicksilver and every agent can build
+  groups (create_group, update_group, list_groups). Hermes and every agent can build
   small live apps that show up in Hermes One (app_guide, list_hermes_apps, publish_app, undo_app,
   app_logs, use_app). Other clients, like a phone app, reach those apps through the plugin's API
   routes (/api/plugins/hermes-one/, dashboard/plugin_api.py).

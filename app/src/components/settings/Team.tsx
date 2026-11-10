@@ -49,7 +49,7 @@ export function ModelPicker({ profile, provider, model, options, onChanged }: { 
         r = await api.setProfileModel(profile, prov, mod, true)
       }
       onChanged(prov, mod)
-      toast(`${profile === 'default' ? 'Quicksilver' : 'It'} now uses ${api.prettyModel(mod)}`)
+      toast(`${profile === 'default' ? 'Hermes' : 'It'} now uses ${api.prettyModel(mod)}`)
     } catch (e: any) { toast(`Couldn’t change the model: ${e?.message ?? e}`) } finally { setBusy(false) }
   }
   return (
@@ -64,7 +64,7 @@ export function ModelPicker({ profile, provider, model, options, onChanged }: { 
 function BotCard({ p, options, open, onToggle, onChanged }: { p: api.Profile; options?: api.ModelOptions; open: boolean; onToggle: () => void; onChanged: () => void }) {
   const bot = useStore((s) => s.bots.find((b) => b.profile === p.name))
   const chief = p.is_default
-  const name = chief ? 'Quicksilver' : bot?.name ?? p.display_name ?? p.name
+  const name = chief ? 'Hermes' : bot?.name ?? p.display_name ?? p.name
   const [model, setModel] = useState({ provider: p.provider, model: p.model })
   const [menu, setMenu] = useState(false)
   const more = useRef<HTMLButtonElement>(null)
@@ -93,7 +93,7 @@ function BotCard({ p, options, open, onToggle, onChanged }: { p: api.Profile; op
       <div className="srow click" onClick={onToggle}>
         <BotFace profile={p.name} size={40} poseKey={bot?.poseKey} watch={false} />
         <div className="tx">
-          <div className="t1"><span>{name}</span>{chief ? <Badge tone="quiet">Leads your agents</Badge> : null}{!p.has_env && !chief ? <Badge tone="quiet">Uses Quicksilver’s keys</Badge> : null}</div>
+          <div className="t1"><span>{name}</span>{chief ? <Badge tone="quiet">Leads your agents</Badge> : null}{!p.has_env && !chief ? <Badge tone="quiet">Uses Hermes’ keys</Badge> : null}</div>
           <div className="t2">{role || (chief ? 'Talks with you and hands work to the agents.' : 'No role written yet.')}</div>
         </div>
         <div className="act" onClick={(e) => e.stopPropagation()}>
@@ -175,9 +175,9 @@ function AddBotDialog({ open, onClose, onDone, options }: { open: boolean; onClo
       footer={<><span className="sp" /><button className="b-text" onClick={onClose}>Cancel</button><button className="b-pri" disabled={!ok || busy} onClick={() => void go()}>{busy ? 'Adding…' : 'Add agent'}</button></>}>
       <div className="form">
         <label><span>Name</span><input className="answer" value={name} autoFocus placeholder="researcher" onChange={(e) => setName(e.target.value.toLowerCase().replace(/\s+/g, '-'))} />
-          <em>{taken ? 'There’s already an agent with that name.' : 'Lowercase letters, numbers, - and _. It starts with Quicksilver’s keys, settings and skills.'}</em></label>
+          <em>{taken ? 'There’s already an agent with that name.' : 'Lowercase letters, numbers, - and _. It starts with Hermes’ keys, settings and skills.'}</em></label>
         <label><span>What it’s for</span><input className="answer" value={role} placeholder="Finds sources and writes short briefs" onChange={(e) => setRole(e.target.value)} /></label>
-        <label><span>Model</span><Select value={model} options={choices} onChange={setModel} placeholder="Same as Quicksilver" width={380} /></label>
+        <label><span>Model</span><Select value={model} options={choices} onChange={setModel} placeholder="Same as Hermes" width={380} /></label>
         <label><span>How it behaves <em>optional</em></span><textarea className="answer" rows={5} value={soulText} placeholder="You are a careful researcher. Always cite sources…" onChange={(e) => setSoulText(e.target.value)} /></label>
         {err ? <p className="free" style={{ color: 'var(--tint-red)' }}>{err}</p> : null}
       </div>
@@ -215,7 +215,7 @@ export function TeamPage(_: { profile: string }) {
   return (
     <>
       <div className="shead">
-        <div className="tx"><h1>Agents</h1><p>Quicksilver talks with you and hands work out. Give each agent the model, role and personality that fit its work.</p></div>
+        <div className="tx"><h1>Agents</h1><p>Hermes talks with you and hands work out. Give each agent the model, role and personality that fit its work.</p></div>
         <button className="b-soft" onClick={() => setImporting(true)}><Icon name="upload" size={15} /> Import</button>
         <button className="b-soft" onClick={() => setGrouping(true)}><Icon name="group" size={15} /> New group</button>
         <button className="b-pri" onClick={() => setAdding(true)}><Icon name="plus" size={15} /> Add an agent</button>

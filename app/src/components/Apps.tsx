@@ -25,12 +25,12 @@ export function Apps() {
       <div className="shead">
         <div className="tx">
           <h1>Apps</h1>
-          <p>Small live apps your agents made for you. Ask Quicksilver for one, like “a habit tracker” or “a radio for focus music”.</p>
+          <p>Small live apps your agents made for you. Ask Hermes for one, like “a habit tracker” or “a radio for focus music”.</p>
         </div>
       </div>
       {error ? <ErrorLine text={`Couldn’t load the apps: ${error}`} onRetry={() => void refreshApps()} /> : null}
       {list === null ? <div className="ha-loading"><Spinner size={18} /></div>
-        : list.length === 0 ? <Empty title="No apps yet" body="Tell Quicksilver what you’d like, for example “make me an app that tracks my habits”. It shows up here, and as an Open card in the chat." />
+        : list.length === 0 ? <Empty title="No apps yet" body="Tell Hermes what you’d like, for example “make me an app that tracks my habits”. It shows up here, and as an Open card in the chat." />
         : <div className="tiles flow">{list.map((a) => <AppTileCard key={a.id} app={a} />)}</div>}
     </PageFrame>
   )

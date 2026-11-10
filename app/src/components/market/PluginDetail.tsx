@@ -178,7 +178,7 @@ export function RunDialog({ run, profile, botName, onClose, onRetry }: { run: Ru
         {res?.outcome === 'consent' && updating ? <button className="b-pri" onClick={() => onRetry({ ...run, accept: true, attempt: run.attempt + 1 })}>Agree and update</button> : null}
         {canForce ? <button className="b-pri" onClick={() => onRetry({ ...run, force: true, attempt: run.attempt + 1 })}>Update anyway</button> : null}
         {res && !done && res.outcome !== 'consent' && !canForce ? <button className="b-pri" onClick={() => onRetry({ ...run, attempt: run.attempt + 1 })}>Try again</button> : null}
-        {done && !updating ? <button className="b-pri" onClick={() => { close(); askChief(`Use ${p.title} to `) }}>Try it with Quicksilver</button> : null}
+        {done && !updating ? <button className="b-pri" onClick={() => { close(); askChief(`Use ${p.title} to `) }}>Try it with Hermes</button> : null}
       </>}>
       <div className="mk-flow">
         <Bridge stage={stage} logo={<PluginThumb p={p} size={60} />} />

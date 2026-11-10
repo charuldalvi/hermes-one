@@ -103,7 +103,7 @@ const MODELS_POINTER: Record<string, { tab: Parameters<typeof goModels>[0]; text
 
 export function ConfigPage({ profile }: { profile: string }) {
   const bots = useStore((s) => s.bots)
-  const who = profile === 'default' ? 'Quicksilver' : bots.find((b) => b.profile === profile)?.name ?? profile
+  const who = profile === 'default' ? 'Hermes' : bots.find((b) => b.profile === profile)?.name ?? profile
   const data = useAsync(async () => {
     const [schema, values, defaults] = await Promise.all([configSchema(profile), configValues(profile), configDefaults().catch(() => ({} as ConfigRecord))])
     return { schema, values, defaults }

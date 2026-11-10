@@ -58,7 +58,7 @@ export function Made() {
       <div className="hdr drag"><span className="crumb"><Icon name="box" /><span className="cur">Made</span></span></div>
       <div className="view">
         <h1>Made</h1>
-        <p className="sub">Everything the agents produced in your chat with Quicksilver, newest first. Click to open; ⌥-click shows it in Finder.</p>
+        <p className="sub">Everything the agents produced in your chat with Hermes, newest first. Click to open; ⌥-click shows it in Finder.</p>
         {files.length ? <div className="stools">
           <Search value={q} onChange={setQ} placeholder="Find a file" />
           <Tabs items={[{ key: 'all', label: 'All', count: files.length }, { key: 'pictures', label: 'Pictures', count: files.filter((f) => isPic(f.path)).length }, { key: 'videos', label: 'Videos', count: files.filter((f) => isVid(f.path)).length }, { key: 'files', label: 'Files' }]} value={kind} onChange={setKind} />
@@ -94,7 +94,7 @@ export function Apps() {
 
 interface QItem { key: string; section: string; label: string; hint: string; icon?: string; profile?: string; run: () => void }
 
-/** Quick actions (⌘K): a command palette to jump to Quicksilver, an agent, a group, a page or a setting. */
+/** Quick actions (⌘K): a command palette to jump to Hermes, an agent, a group, a page or a setting. */
 export function QuickActions({ onClose }: { onClose: () => void }) {
   const bots = useStore((s) => s.bots)
   const needs = useStore((s) => s.needs)
@@ -108,8 +108,8 @@ export function QuickActions({ onClose }: { onClose: () => void }) {
     const focus = () => setTimeout(() => window.dispatchEvent(new Event('hermes:focus-composer')), 60)
     const waiting = needs.filter((n) => !n.outcome).length
     const all: QItem[] = [
-      { key: 'qs', section: 'Quicksilver', label: 'Message Quicksilver', hint: 'Leads your agents', profile: 'default', run: () => { openChat('default'); focus() } },
-      ...(waiting ? [{ key: 'needs', section: 'Quicksilver', label: 'What needs you', hint: `${waiting} waiting`, icon: 'alert', run: () => openPanel('__needs') }] : []),
+      { key: 'qs', section: 'Hermes', label: 'Message Hermes', hint: 'Leads your agents', profile: 'default', run: () => { openChat('default'); focus() } },
+      ...(waiting ? [{ key: 'needs', section: 'Hermes', label: 'What needs you', hint: `${waiting} waiting`, icon: 'alert', run: () => openPanel('__needs') }] : []),
       ...bots.filter((b) => !b.isChief).map((b) => ({ key: `a:${b.profile}`, section: 'Agents', label: b.name, hint: b.role ?? 'Agent', profile: b.profile, run: () => { openChat(b.profile); focus() } })),
       ...rooms.map((r) => ({ key: `g:${r.room_id}`, section: 'Groups', label: r.name, hint: `${r.members.length} agents`, icon: 'group', run: () => openGroup(r.room_id) })),
       { key: 'p:made', section: 'Pages', label: 'Made', hint: 'Files from the chat', icon: 'box', run: () => setState({ view: 'made' }) },

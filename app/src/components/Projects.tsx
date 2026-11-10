@@ -237,7 +237,7 @@ export function Projects() {
   const makeMain = async () => {
     setMenu(false)
     if (!slug) return
-    try { await kb.makeCurrent(slug); toast(`Quicksilver now adds new work to ${name}`); void boardsQ.reload(true) } catch (e: any) { toast(`Couldn’t change it: ${e?.message ?? e}`) }
+    try { await kb.makeCurrent(slug); toast(`Hermes now adds new work to ${name}`); void boardsQ.reload(true) } catch (e: any) { toast(`Couldn’t change it: ${e?.message ?? e}`) }
   }
   const archiveBoard = async (forGood: boolean) => {
     setMenu(false)
@@ -274,7 +274,7 @@ export function Projects() {
         <div className="shead">
           <div className="tx">
             <h1>Board</h1>
-            <p>{meta?.description?.trim() || 'Hermes’ kanban: work Quicksilver planned, in columns, and which agent is doing it.'}</p>
+            <p>{meta?.description?.trim() || 'Hermes’ kanban: work Hermes planned, in columns, and which agent is doing it.'}</p>
           </div>
           <button className="b-pri" onClick={() => setNewIn('ready')} disabled={!slug}><Icon name="plus" size={15} />New task</button>
         </div>
@@ -290,7 +290,7 @@ export function Projects() {
             <button className="mi" onClick={() => void startReady()}><Icon name="play" size={15} /><span className="ml">Start everything that’s ready</span></button>
             {parked.length > 1 ? <button className="mi" onClick={() => void putAwayParked()}><Icon name="box" size={15} /><span className="ml">Put away {parked.length} parked steps</span></button> : null}
             <button className="mi" onClick={() => { setMenu(false); setArchived(!archived) }}><Icon name="eye" size={15} /><span className="ml">Show put-away tasks</span>{archived ? <Icon name="check" size={14} /> : null}</button>
-            {meta && !meta.is_current ? <button className="mi" onClick={() => void makeMain()}><Icon name="star" size={15} /><span className="ml">Make it Quicksilver’s main board</span></button> : null}
+            {meta && !meta.is_current ? <button className="mi" onClick={() => void makeMain()}><Icon name="star" size={15} /><span className="ml">Make it Hermes’ main board</span></button> : null}
             <div className="mh">This board</div>
             <button className="mi" onClick={() => { setMenu(false); setBoardForm('edit') }} disabled={!meta}><Icon name="edit" size={15} /><span className="ml">Rename…</span></button>
             <button className="mi" onClick={() => void archiveBoard(false)} disabled={slug === 'default'}><Icon name="download" size={15} /><span className="ml">Archive…</span>{slug === 'default' ? <span className="mhint">Always kept</span> : null}</button>
@@ -318,8 +318,8 @@ export function Projects() {
               {/* An empty board still shows its columns, so it reads as the kanban it is. */}
               <div className="pj-emptybar">
                 <BotFace profile="default" size={64} watch={false} disc={false} />
-                <span className="pj-et"><b>Nothing on this board yet.</b> Ask Quicksilver to plan something and the agents take it from there, or add a task yourself.</span>
-                <button className="b-soft pj-btn" onClick={askChief}><Icon name="chat" size={15} />Ask Quicksilver</button>
+                <span className="pj-et"><b>Nothing on this board yet.</b> Ask Hermes to plan something and the agents take it from there, or add a task yourself.</span>
+                <button className="b-soft pj-btn" onClick={askChief}><Icon name="chat" size={15} />Ask Hermes</button>
                 <button className="b-soft pj-btn" onClick={() => setNewIn('ready')}><Icon name="plus" size={15} />New task</button>
               </div>
               {view === 'board' ? <BoardView lanes={lanes} wf={wf} bots={bots} act={boardActs} tick={tick} /> : null}
@@ -371,7 +371,7 @@ function BoardPicker({ boards, slug, onPick, onNew, loading }: { boards: kb.KBoa
           const you = (c.review ?? 0) + (c.blocked ?? 0)
           return (
             <button key={b.slug} className={`mi pj-bmi${b.slug === slug ? ' on' : ''}`} onClick={() => { setOpen(false); onPick(b.slug) }}>
-              <span className="ml">{b.name || b.slug}{b.is_current ? <span className="pj-main-tag" title="Quicksilver adds new work here">main</span> : null}</span>
+              <span className="ml">{b.name || b.slug}{b.is_current ? <span className="pj-main-tag" title="Hermes adds new work here">main</span> : null}</span>
               <span className="pj-bdots">
                 {you ? <span title="Waiting on you or on hold"><i className="dot need" />{you}</span> : null}
                 {working ? <span title="At work"><i className="dot run" />{working}</span> : null}

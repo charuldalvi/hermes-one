@@ -164,7 +164,7 @@ function Reply({ m, bots, needs }: { m: Msg; bots: Bot[]; needs: Need[] }) {
 function FromCard({ m, bots }: { m: Msg; bots: Bot[] }) {
   const [more, setMore] = useState(false)
   const b = bots.find((x) => x.profile === m.from)
-  const who = m.from === 'default' ? 'Quicksilver' : b?.name ?? prettyName(m.from ?? '', undefined)
+  const who = m.from === 'default' ? 'Hermes' : b?.name ?? prettyName(m.from ?? '', undefined)
   const long = m.text.length > 360
   return (
     <div className="fromcard">
@@ -194,7 +194,7 @@ export function Chat() {
   const isChiefChat = profile === 'default'
   const bots = useStore((s) => s.bots)
   const bot = bots.find((b) => b.profile === profile)
-  const name = isChiefChat ? 'Quicksilver' : bot?.name ?? prettyName(profile)
+  const name = isChiefChat ? 'Hermes' : bot?.name ?? prettyName(profile)
   const needs = useStore((s) => s.needs)
   useStore((s) => s.tick)
   const [shown, setShown] = useState(PAGE)
@@ -274,7 +274,7 @@ export function Chat() {
           isChiefChat ? (
             <div className="center" style={{ minHeight: 360 }}><div className="box">
               <BotFace profile="default" size={160} mood="idle" disc={false} />
-              <h2>Hi, I’m Quicksilver.</h2>
+              <h2>Hi, I’m Hermes.</h2>
               <p>Everything you ask goes to me. I hand work to the rest of the agents and bring the results back here.</p>
             </div></div>
           ) : (

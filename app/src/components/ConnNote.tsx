@@ -22,14 +22,14 @@ function words(connection: string, raw?: string) {
   // Another computer's Hermes (Settings › the footer switcher): Hermes One doesn't start that one.
   const other = currentSystem()
   if (other && other.kind !== 'local') {
-    if (connection === 'connecting') return { title: `Connecting to ${other.name}…`, body: `Finding Quicksilver and the agents on ${other.name}.` }
+    if (connection === 'connecting') return { title: `Connecting to ${other.name}…`, body: `Finding Hermes and the agents on ${other.name}.` }
     if (/Sign in to|sign-in .* ran out/i.test(raw ?? '')) return { title: `Sign in to ${other.name}`, body: `${plain(raw)} Open the system switcher at the bottom left and pick ${other.name}.` }
     return { title: `Can’t reach ${other.name}`, body: `${other.name} isn’t answering${detail && detail !== 'lost' ? ` (${detail})` : ''}.${other.kind === 'address' ? ' Is Tailscale on?' : ''} Hermes One tries again every few seconds.` }
   }
   if (connection === 'connecting' && detail === 'waiting') return { title: 'Still starting Hermes…', body: 'If macOS asks whether Hermes One can access files on a drive, click Allow. Hermes One can’t reach Hermes until you do.' }
   if (connection === 'connecting' && detail === 'starting') return { title: 'Starting Hermes…', body: 'Hermes isn’t running, so Hermes One is starting it. This takes about 20 seconds.' }
   if (connection === 'connecting' && detail === 'lost') return { title: 'Hermes stopped', body: 'Looking for it again. Quitting Hermes Desktop stops Hermes; Hermes One starts it again.' }
-  if (connection === 'connecting') return { title: 'Connecting to Hermes…', body: 'Finding Quicksilver and the agents on this Mac.' }
+  if (connection === 'connecting') return { title: 'Connecting to Hermes…', body: 'Finding Hermes and the agents on this Mac.' }
   return { title: 'Can’t reach Hermes', body: `Hermes isn’t answering on this Mac${detail ? ` (${detail})` : ''}. Hermes One tries again every few seconds.` }
 }
 

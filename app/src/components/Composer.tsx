@@ -155,7 +155,7 @@ export function Composer() {
   const { profile, chat: chief } = useChat()
   const isChiefChat = profile === 'default'
   const bot = useStore((s) => s.bots.find((b) => b.profile === profile))
-  const name = isChiefChat ? 'Quicksilver' : bot?.name ?? profile
+  const name = isChiefChat ? 'Hermes' : bot?.name ?? profile
   const needs = useStore((s) => s.needs)
   const connection = useStore((s) => s.connection)
   const [text, setText] = useState(() => drafts.get(profile) ?? '')
@@ -216,7 +216,7 @@ export function Composer() {
             <span className="res" key={f.path} title={f.path}><Icon name={f.mime.startsWith('image/') ? 'image' : 'file'} size={14} />{f.name}
               <button style={{ marginLeft: 4, color: 'var(--text-secondary)' }} onClick={() => setFiles((x) => x.filter((y) => y.path !== f.path))} aria-label={`Remove ${f.name}`}><Icon name="x" size={12} /></button></span>
           ))}</div> : null}
-          <textarea ref={area} rows={1} value={text} placeholder={isChiefChat ? 'Ask anything, or tell Quicksilver who should do it' : `Ask ${name} anything`}
+          <textarea ref={area} rows={1} value={text} placeholder={isChiefChat ? 'Ask anything, or tell Hermes who should do it' : `Ask ${name} anything`}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
               if (slashOpen) {

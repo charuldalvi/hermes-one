@@ -87,12 +87,12 @@ export function WorkPane({ panelKey, onClose }: { panelKey: string; onClose: () 
   const terms = useTerms(profile)
   const running = terms.filter((t) => t.status === 'running').length
   const look = lookKind()
-  const name = profile === 'default' ? 'Quicksilver' : bots.find((b) => b.profile === profile)?.name ?? prettyName(profile)
+  const name = profile === 'default' ? 'Hermes' : bots.find((b) => b.profile === profile)?.name ?? prettyName(profile)
   const items = [
     ...(look === 'screen' ? [{ key: 'screen' as const, label: 'Screen' }] : look === 'browser' ? [{ key: 'browser' as const, label: 'Browser' }] : []),
     { key: 'term' as const, label: 'Terminal', ...(terms.length ? { count: running || terms.length } : {}) },
   ]
-  const options = [{ value: 'default', label: 'Quicksilver' }, ...bots.filter((b) => !b.isChief).map((b) => ({ value: b.profile, label: b.name }))]
+  const options = [{ value: 'default', label: 'Hermes' }, ...bots.filter((b) => !b.isChief).map((b) => ({ value: b.profile, label: b.name }))]
   const shownKind = items.some((i) => i.key === kind) ? kind : 'term'
   return (
     <div className="rpin wkpane">

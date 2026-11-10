@@ -7,10 +7,10 @@ import { setState, useStore } from '../lib/store'
 import { Dialog, Popover, useAsync } from './ui'
 
 const SHORTCUTS: [string, string][] = [
-  ['⌥Space', 'Write to Quicksilver from any app (quick entry)'],
+  ['⌥Space', 'Write to Hermes from any app (quick entry)'],
   ['⌘K', 'Quick actions: jump to an agent, a page or a setting'],
-  ['⌘N', 'Write to Quicksilver'],
-  ['⌘F', 'Search your chat with Quicksilver'],
+  ['⌘N', 'Write to Hermes'],
+  ['⌘F', 'Search your chat with Hermes'],
   ['⌘,', 'Settings'],
   ['/', 'Commands and skills (in the message box)'],
   ['Enter', 'Send · Shift Enter for a new line'],

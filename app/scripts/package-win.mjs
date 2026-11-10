@@ -114,7 +114,7 @@ if (-not $hermes -or -not (Test-Path -LiteralPath (Join-Path $hermesHome 'config
     Write-Host "The Hermes plugin couldn't be turned on for: $($failed -join ', '). Turn it on in Hermes One: Settings, Plugins." -ForegroundColor Yellow
   } else {
     $others = $profiles.Count - 1
-    Write-Host ("The Hermes plugin is on for Quicksilver" + $(if ($others -eq 1) { ' and 1 other agent.' } elseif ($others -gt 1) { " and $others other agents." } else { '.' }))
+    Write-Host ("The Hermes plugin is on for Hermes" + $(if ($others -eq 1) { ' and 1 other agent.' } elseif ($others -gt 1) { " and $others other agents." } else { '.' }))
   }
 }
 

@@ -48,7 +48,7 @@ export function KeysPage({ profile }: { profile: string }) {
       <div className="shead">
         <div className="tx">
           <h1>Keys and accounts</h1>
-          <p>How {name} reaches the companies that run its models and tools. Keys stay on this Mac in {name === 'Quicksilver' ? 'Quicksilver’s' : `${name}’s`} own settings and are never shown unless you ask.</p>
+          <p>How {name} reaches the companies that run its models and tools. Keys stay on this Mac in {name === 'Hermes' ? 'Hermes’' : `${name}’s`} own settings and are never shown unless you ask.</p>
         </div>
       </div>
       <div className="stools ky-tabs">

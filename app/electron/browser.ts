@@ -18,7 +18,7 @@ export type BrowserEvent =
 
 const real = (p: string) => { try { return fs.realpathSync(p) } catch { return path.resolve(p) } }
 
-/** Every Hermes home on this computer: the main one (Quicksilver, "default") and each agent's. */
+/** Every Hermes home on this computer: the main one (Hermes, "default") and each agent's. */
 export function hermesHomes(root: string): { profile: string; home: string }[] {
   const out = [{ profile: 'default', home: real(root) }]
   try {

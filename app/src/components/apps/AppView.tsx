@@ -16,7 +16,7 @@ const isAction = (v: unknown): v is Action | Action[] => Array.isArray(v) ? v.ev
 
 export function builderName(bot: string | undefined, bots: { profile: string; name: string }[]) {
   if (!bot) return ''
-  if (bot === 'default' || bot === 'chief' || bot === 'quicksilver') return 'Quicksilver'
+  if (bot === 'default' || bot === 'hermes') return 'Hermes'
   return bots.find((b) => b.profile === bot)?.name ?? prettyName(bot)
 }
 
@@ -224,7 +224,7 @@ export function AppView({ app }: { app: AppSummary }) {
                 <pre className="ha-code">{error}</pre>
                 <div className="ha-broken-row">
                   <button className="b-soft" onClick={() => setReload((n) => n + 1)}>Try again</button>
-                  <button className="b-pri" onClick={() => askFix(`${app.name} didn’t open. The error was:\n${error}`)}>Ask Quicksilver to fix it</button>
+                  <button className="b-pri" onClick={() => askFix(`${app.name} didn’t open. The error was:\n${error}`)}>Ask Hermes to fix it</button>
                 </div>
               </div>
             ) : <div className="ha-loading"><Spinner size={18} /></div>}
@@ -242,17 +242,17 @@ function ChangeBox({ app, where, onDone }: { app: AppSummary; where: string; onD
     const t = text.trim()
     if (!t) return
     chatFromApp(app.name, undefined, `Change this app (id "${app.id}"). On the “${where}” screen: ${t}`, false)
-    toast(`Quicksilver is on it. ${app.name} updates here when it’s done.`)
+    toast(`Hermes is on it. ${app.name} updates here when it’s done.`)
     onDone()
   }
   return (
     <div className="ha-change">
-      <span>What should change on “{where}”? Quicksilver edits {app.name} and it updates here.</span>
+      <span>What should change on “{where}”? Hermes edits {app.name} and it updates here.</span>
       <textarea className="answer" autoFocus rows={3} value={text} placeholder="Make the buttons bigger, add a weekly view…" onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send() } if (e.key === 'Escape') onDone() }} />
       <div className="ha-change-row">
         <button className="b-text" onClick={onDone}>Cancel</button>
-        <button className="b-pri" disabled={!text.trim()} onClick={send}>Send to Quicksilver</button>
+        <button className="b-pri" disabled={!text.trim()} onClick={send}>Send to Hermes</button>
       </div>
     </div>
   )
@@ -276,7 +276,7 @@ function LogDialog({ app, open, onClose, onAsk }: { app: AppSummary; open: boole
       footer={<>
         <button className="b-text" disabled={!text} onClick={() => void navigator.clipboard?.writeText(text).then(() => toast('Copied the log'))}>Copy</button>
         <span className="sp" />
-        <button className="b-text" disabled={!text} onClick={() => { onClose(); onAsk(tail) }}>Ask Quicksilver about it</button>
+        <button className="b-text" disabled={!text} onClick={() => { onClose(); onAsk(tail) }}>Ask Hermes about it</button>
         <button className="b-pri" onClick={onClose}>Done</button>
       </>}>
       {text ? <pre ref={pre} className="ha-log">{text}</pre>

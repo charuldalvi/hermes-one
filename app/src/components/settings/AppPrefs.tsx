@@ -61,8 +61,8 @@ export function AppPrefsPage(_: { profile: string }) {
         <Row title={IS_MAC ? 'Count on the Dock icon' : 'Dot on the taskbar icon'} body={IS_MAC ? 'How many things are waiting for you.' : 'Shows when something is waiting for you.'}>
           <Switch on={p.badge} label="Dock badge" onChange={(v) => { set('badge', v); if (!v) void window.hermesNative.badge(0) }} />
         </Row>
-        <Row title="Notify when Quicksilver finishes" body="Also tell me when Quicksilver finishes a reply while I’m in another app.">
-          <Switch on={p.notifyDone} label="Notify when Quicksilver finishes" onChange={(v) => set('notifyDone', v)} />
+        <Row title="Notify when Hermes finishes" body="Also tell me when Hermes finishes a reply while I’m in another app.">
+          <Switch on={p.notifyDone} label="Notify when Hermes finishes" onChange={(v) => set('notifyDone', v)} />
         </Row>
       </div>
       <div className="ssec"><h2>Look and feel</h2></div>

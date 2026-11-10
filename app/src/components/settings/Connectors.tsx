@@ -68,7 +68,7 @@ export function ConnectorsPage({ profile }: { profile: string }) {
 
           {seg === 'all' && !t && suggested.length ? (
             <>
-              <Section title="Suggested for you" note="From what you ask Quicksilver" />
+              <Section title="Suggested for you" note="From what you ask Hermes" />
               <div className="tiles flow">
                 {suggested.map((e) => (
                   <div key={e.key} className="tile-c" onClick={() => m.connect(e)}>

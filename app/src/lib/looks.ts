@@ -1,15 +1,15 @@
 // Each agent's own bead: a body shape, a colour and a resting pose. No two agents share a shape (the engine
 // draws twelve) or, while there are colours to go round, a colour; the six poses are spread evenly. A look is
 // kept once given (remembered on this Mac), so adding an agent never changes anyone else's bead.
-// Quicksilver (the default profile) isn't here: it keeps its own round bead in the app's accent colour.
+// Hermes (the default profile) isn't here: it keeps its own round bead in the app's accent colour.
 // @ts-ignore plain JS engine
-import { setLooks } from '../quicksilver/engine.js'
+import { setLooks } from '../bead/engine.js'
 
 export interface Look { shape: string; color: string; pose: string }
 
 const KEY = 'hermes-one:looks'
 const SHAPES = ['squircle', 'capsule', 'drop', 'hexagon', 'letter', 'cloud', 'triangle', 'diamond', 'cookie', 'sunny', 'clover', 'arch']
-// Away from the status colours (amber needs you, red went wrong, green done) and from Quicksilver's blue.
+// Away from the status colours (amber needs you, red went wrong, green done) and from Hermes' blue.
 const COLORS = ['#8b5cf6', '#14b8a6', '#ec4899', '#0ea5e9', '#06b6d4', '#d946ef', '#a855f7', '#6366f1', '#fb923c', '#a3e635', '#fb7185']
 const POSES = ['Round', 'Peek', 'Corner', 'Side', 'Hang', 'Lean']
 

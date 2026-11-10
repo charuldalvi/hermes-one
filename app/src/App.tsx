@@ -140,12 +140,12 @@ export function App() {
         <main className="chat">
           <div className="hdr drag">
             {isChiefChat
-              ? <span className="crumb"><BotFace profile="default" size={20} watch={false} poseKey={getState().bots.find((b) => b.isChief)?.poseKey} /><span className="cur">Quicksilver</span><span className="sl">·</span><span>Leads your agents</span></span>
+              ? <span className="crumb"><BotFace profile="default" size={20} watch={false} poseKey={getState().bots.find((b) => b.isChief)?.poseKey} /><span className="cur">Hermes</span><span className="sl">·</span><span>Leads your agents</span></span>
               : <span className="crumb"><BotFace profile={chatWith} size={20} watch={false} poseKey={withBot?.poseKey} /><span className="cur">{withBot?.name ?? chatWith}</span>{withBot?.role ? <><span className="sl">·</span><span className="crole">{withBot.role}</span></> : null}</span>}
             <span className="sp" />
             <ChatSearchButton />
             <ChatSettingsButton />
-            <button className={`hbtn nodrag${workOpen ? ' on' : ''}`} title={workOpen ? 'Hide the browser and terminal' : `Show ${isChiefChat ? 'Quicksilver' : withBot?.name ?? 'this agent'}’s ${lookKind() === 'screen' ? 'screen' : lookKind() === 'browser' ? 'browser' : 'commands'} and terminal beside the chat`} onClick={() => toggleWork()}><Icon name="screen" /></button>
+            <button className={`hbtn nodrag${workOpen ? ' on' : ''}`} title={workOpen ? 'Hide the browser and terminal' : `Show ${isChiefChat ? 'Hermes' : withBot?.name ?? 'this agent'}’s ${lookKind() === 'screen' ? 'screen' : lookKind() === 'browser' ? 'browser' : 'commands'} and terminal beside the chat`} onClick={() => toggleWork()}><Icon name="screen" /></button>
             <button className={`hbtn nodrag${panel && !workOpen ? ' on' : ''}`} title={isChiefChat ? 'Show the side panel' : `${withBot?.name ?? 'This agent'}’s latest work`} onClick={() => (panel && !workOpen ? close() : open(isChiefChat ? getState().lastPanel ?? '__needs' : chatWith))}><Icon name="panelR" /></button>
           </div>
           {connection === 'open' || hasMsgs ? (

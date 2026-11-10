@@ -5,7 +5,7 @@
 // springs to the nearest of the five stops when let go (carrying the throw).
 import { useEffect, useRef, useState } from 'react'
 // @ts-ignore plain JS engine
-import { Sp, REDUCED } from '../quicksilver/engine.js'
+import { Sp, REDUCED } from '../bead/engine.js'
 
 const INK = {
   track: '#0E1015', dim: '255,255,255', lit: '76,141,255', hot: '227,236,255', spark: '122,167,255', sparkHot: '255,255,255',

@@ -40,7 +40,7 @@ function Work({ ask, turn, live, step, since, run }: { ask?: Msg; turn?: Msg; li
   const durText = dur < 60 ? `${dur}s` : `${Math.floor(dur / 60)}m ${String(dur % 60).padStart(2, '0')}s`
   return (
     <>
-      {ask ? <div className="free" style={{ marginBottom: 18 }}><span style={{ color: 'var(--text-primary)' }}>{run ? 'The job' : ask.from === 'default' || !ask.from ? 'Quicksilver asked' : `${prettyName(ask.from)} asked`}:</span> {ask.text.length > 300 ? ask.text.slice(0, 300) + '…' : ask.text}</div> : null}
+      {ask ? <div className="free" style={{ marginBottom: 18 }}><span style={{ color: 'var(--text-primary)' }}>{run ? 'The job' : ask.from === 'default' || !ask.from ? 'Hermes asked' : `${prettyName(ask.from)} asked`}:</span> {ask.text.length > 300 ? ask.text.slice(0, 300) + '…' : ask.text}</div> : null}
       {(tools.length || live) ? (
         <div className="trace">
           <button className="tr" onClick={() => setOpen(!open)}><span className="g"><Icon name={open ? 'chevD' : 'chevR'} size={15} /></span>{live ? `Working for ${elapsed(since)}` : `Worked for ${dur ? durText : 'a moment'}`}</button>
@@ -67,7 +67,7 @@ function Transcript({ msgs, name }: { msgs: Msg[]; name: string }) {
   return (
     <div className="tscript">
       {shown.map((m) => m.role === 'user' ? (
-        <div key={m.id} className="ts-ask"><span className="ts-who">{m.from && m.from !== 'default' ? prettyName(m.from) : 'Quicksilver'}</span><div className="ts-bub">{m.text.length > 1200 ? m.text.slice(0, 1200) + '…' : m.text}</div></div>
+        <div key={m.id} className="ts-ask"><span className="ts-who">{m.from && m.from !== 'default' ? prettyName(m.from) : 'Hermes'}</span><div className="ts-bub">{m.text.length > 1200 ? m.text.slice(0, 1200) + '…' : m.text}</div></div>
       ) : m.role === 'notice' ? (
         <div key={m.id} className="notice" style={{ margin: '0 0 18px' }}>{m.text}</div>
       ) : (
@@ -143,7 +143,7 @@ export function Panel({ profile, onClose }: { profile: string; onClose: () => vo
       {head(<BotFace profile={profile} size={22} mood={botMood(bot, 22, needs)} poseKey={bot?.poseKey} watch={false} />, bot?.name ?? prettyName(profile))}
       <div className="rscroll"><div className="rcol">
         <div className="btitle"><BotFace profile={profile} size={44} mood={botMood(bot, 44, needs)} poseKey={bot?.poseKey} watch />{bot?.name ?? prettyName(profile)}</div>
-        <p className="brole">{bot?.role || 'One of your agents. Quicksilver hands it work when it fits.'}</p>
+        <p className="brole">{bot?.role || 'One of your agents. Hermes hands it work when it fits.'}</p>
         <div className="ptabs">
           <Tabs items={[{ key: 'work', label: 'Latest work' }, { key: 'chat', label: chat?.source === 'run' ? 'The job' : 'Its chat', count: msgs.filter((m) => m.role !== 'notice').length || undefined }]} value={tab} onChange={setTab} />
           <span className="sp" />
@@ -153,7 +153,7 @@ export function Panel({ profile, onClose }: { profile: string; onClose: () => vo
         {tab === 'chat' ? <Transcript msgs={msgs} name={bot?.name ?? prettyName(profile)} /> : <>
         {mine.map((n) => <div key={n.key} style={{ marginBottom: 22 }}><NeedCard need={n} bot={bot} /></div>)}
         {chat?.loading ? <p className="free">Loading its work…</p> : null}
-        {!chat?.loading && !turn && !live ? <p className="free">No work yet. When Quicksilver hands {bot?.name ?? 'it'} something, you’ll see what it read, the steps it took and its answer here.</p> : null}
+        {!chat?.loading && !turn && !live ? <p className="free">No work yet. When Hermes hands {bot?.name ?? 'it'} something, you’ll see what it read, the steps it took and its answer here.</p> : null}
         {chat?.source === 'run' && turn ? <div className="free" style={{ marginBottom: 14 }}>Latest job from the board{chat.title ? `: ${chat.title}` : ''}</div> : null}
         {turn || live ? <Work ask={ask} turn={turn} live={!!live} step={bot?.step} since={bot?.since} run={chat?.source === 'run'} /> : null}
         {body && !live ? <div className="body"><Md text={body} /></div> : null}

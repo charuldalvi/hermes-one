@@ -20,7 +20,7 @@ let chiefSession: string | undefined
 export const isChief = (profile: string) => profile === 'default'
 /** The agent a live Hermes session belongs to (for the side panel's Browser and Terminal). */
 export const sessionProfile = (sid?: string) => (sid ? sessions.get(sid)?.profile : undefined)
-/** The live session of an agent's chat (Quicksilver's, or the agent's own), for per-session calls like process.list. */
+/** The live session of an agent's chat (Hermes', or the agent's own), for per-session calls like process.list. */
 export function liveSession(profile: string): string | undefined {
   if (isChief(profile)) return chiefSession
   return getState().chats[profile]?.sessionId ?? getState().bots.find((b) => b.profile === profile)?.runtimeId
@@ -29,7 +29,7 @@ export function liveSession(profile: string): string | undefined {
 const active = () => getState().chatWith
 const nameOf = (profile: string) => prettyName(profile, getState().bots.find((b) => b.profile === profile)?.name)
 export function prettyName(profile: string, display?: string) {
-  if (isChief(profile)) return 'Quicksilver'
+  if (isChief(profile)) return 'Hermes'
   if (display) return display
   const s = profile.replace(/[-_]/g, ' ').trim()
   return s.charAt(0).toUpperCase() + s.slice(1)
@@ -139,7 +139,7 @@ async function openChief() {
     const created = await gateway.request<any>('session.create', { request_id: uuid(), source: 'gui', profile: 'default', title: CANONICAL_TITLE, hidden: true, follow_profile_config: true })
     id = created?.stored_session_id ?? created?.session_id // resume takes the stored id (`hermes serve` gives a live one in session_id)
   }
-  if (!id) throw new Error("Couldn't find or start Quicksilver's chat")
+  if (!id) throw new Error("Couldn't find or start Hermes' chat")
   const res = await gateway.request<any>('session.resume', { session_id: id, profile: 'default', source: 'desktop', cols: 100 }, 60_000)
   chiefSession = res.session_id
   sessions.set(res.session_id, { profile: 'default', generation: res.execution_generation, revision: res.revision })
@@ -280,7 +280,7 @@ export function stripFrom(text: string): { from?: string; handle?: string; body:
 export function profileForHandle(handle?: string): string | undefined {
   if (!handle) return undefined
   const h = handle.toLowerCase().replace(/^@/, '')
-  if (h === 'hermes' || h === 'chief' || h === 'quicksilver' || h === 'default') return 'default'
+  if (h === 'hermes' || h === 'default') return 'default'
   const bots = getState().bots
   return bots.find((b) => b.profile.toLowerCase() === h)?.profile
     ?? bots.find((b) => b.name.toLowerCase() === h.replace(/[-_]/g, ' '))?.profile
@@ -509,7 +509,7 @@ function onEvent(ev: GatewayEvent) {
         const last = [...done].reverse().find((m) => m.role === 'assistant')
         if (chief) {
           window.dispatchEvent(new CustomEvent('hermes:chief-reply', { detail: { text: last?.text ?? text, error: p.status === 'error' } }))
-          if (getPrefs().notifyDone && last?.text) void window.hermesNative.notify?.('Quicksilver replied', last.text.replace(/[#*_`>]/g, '').replace(/\s+/g, ' ').slice(0, 140))
+          if (getPrefs().notifyDone && last?.text) void window.hermesNative.notify?.('Hermes replied', last.text.replace(/[#*_`>]/g, '').replace(/\s+/g, ' ').slice(0, 140))
         } else if (asked && getPrefs().notifyDone && last?.text) {
           // Only your own questions to an agent notify; work Chief handed it reports back through Chief.
           void window.hermesNative.notify?.(`${nameOf(prof)} replied`, last.text.replace(/[#*_`>]/g, '').replace(/\s+/g, ' ').slice(0, 140))
@@ -733,7 +733,7 @@ export async function askChiefAside(title: string, text: string, working: string
     chiefMessages((msgs) => msgs.map((m) => (m.id === card ? { ...m, text: working, pending: !!r?.task_id } : m)))
     return true
   } catch (error: any) {
-    finishCard(card, { text: error?.message ?? 'Quicksilver couldn’t start on that.', error: true })
+    finishCard(card, { text: error?.message ?? 'Hermes couldn’t start on that.', error: true })
     return false
   }
 }

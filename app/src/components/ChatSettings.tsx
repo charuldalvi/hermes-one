@@ -48,7 +48,7 @@ export function ChatSettingsButton() {
 
 function ChatSettingsBody({ onClose }: { onClose: () => void }) {
   const personality = useStore((s) => chatOf(s, s.chatWith).personality)
-  const who = useStore((s) => (s.chatWith === 'default' ? 'Quicksilver' : s.bots.find((b) => b.profile === s.chatWith)?.name ?? 'this agent'))
+  const who = useStore((s) => (s.chatWith === 'default' ? 'Hermes' : s.bots.find((b) => b.profile === s.chatWith)?.name ?? 'this agent'))
   const [mode, setMode] = useState<string>()
   const [yolo, setYolo] = useState<string>()
   const [busy, setBusy] = useState<string>()

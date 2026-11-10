@@ -1,4 +1,4 @@
-// A bot's live state → its Quicksilver mood (Hermes Remote's rules): small faces call out in amber when
+// A bot's live state → its bead mood (Hermes Remote's rules): small faces call out in amber when
 // they need you, big ones raise a hand or knock; working thinks or writes; offline dozes.
 import type { Mood } from '../components/BotFace'
 import type { Bot, ChatState, Need } from './store'

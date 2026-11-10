@@ -7,7 +7,7 @@
 // knob to go back to the usual value. Calm motion (Settings › This app) and reduced motion snap instead.
 import { useEffect, useRef, useState } from 'react'
 // @ts-ignore plain JS engine
-import { Sp, REDUCED } from '../quicksilver/engine.js'
+import { Sp, REDUCED } from '../bead/engine.js'
 
 const calm = () => REDUCED || document.documentElement.dataset.motion === 'calm'
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v))

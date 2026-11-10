@@ -101,7 +101,7 @@ export function ModelsPage({ profile }: { profile: string }) {
         {tab === 'subagents' ? <SubagentsTab profile={who} /> : null}
         {tab === 'local' ? <LocalTab /> : null}
       </div>
-      {scoped && who !== 'default' ? <p className="x-note" style={{ marginTop: 18 }}>Showing {nameOf(who)}’s settings. Quicksilver and the other agents keep their own.</p> : null}
+      {scoped && who !== 'default' ? <p className="x-note" style={{ marginTop: 18 }}>Showing {nameOf(who)}’s settings. Hermes and the other agents keep their own.</p> : null}
     </>
   )
 }

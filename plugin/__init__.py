@@ -1,9 +1,9 @@
 """Hermes One agent tools.
 
 ``create_agent`` adds an agent the way Hermes' own CLI does (``hermes profile create
---clone-from default``), so the agent gets Quicksilver's model, keys and skills, plus its own role
+--clone-from default``), so the agent gets Hermes' model, keys and skills, plus its own role
 (the profile description) and personality (SOUL.md). Bot Mode creates the agent's single
-"Bot Chat" the first time Quicksilver hands it work with ``message_agent``.
+"Bot Chat" the first time Hermes hands it work with ``message_agent``.
 
 The app tools (``app_guide``, ``list_hermes_apps``, ``publish_app``, ``undo_app``, ``app_logs``,
 ``use_app``) live in ``apps_tools.py``: any agent can build small live apps that show up in the
@@ -27,7 +27,7 @@ _NAME_RE = re.compile(r"^[a-z][a-z0-9-]{1,30}$")
 CREATE_AGENT_SCHEMA = {
     "name": "create_agent",
     "description": (
-        "Add a new agent for the user (a Hermes profile that Quicksilver can hand work to with "
+        "Add a new agent for the user (a Hermes profile that Hermes can hand work to with "
         "message_agent). Use when the user asks for a new specialist, helper or agent. "
         "The agent starts with the default profile's model, keys and skills."
     ),
@@ -68,8 +68,8 @@ def create_agent_handler(args: dict, **_kwargs) -> str:
     name = str(args.get("name", "")).strip().lower().replace(" ", "-")
     role = " ".join(str(args.get("role", "")).split())
     instructions = str(args.get("instructions", "") or "").strip()
-    if not _NAME_RE.match(name) or name in {"default", "hermes", "chief", "quicksilver"}:
-        return json.dumps({"ok": False, "error": "Use a short lowercase handle with letters, digits and dashes, like 'editor'. 'default', 'hermes', 'chief' and 'quicksilver' are taken."})
+    if not _NAME_RE.match(name) or name in {"default", "hermes"}:
+        return json.dumps({"ok": False, "error": "Use a short lowercase handle with letters, digits and dashes, like 'editor'. 'default' and 'hermes' are taken."})
     if not role:
         return json.dumps({"ok": False, "error": "Give the agent a one or two sentence role."})
     root = _root_home()
@@ -98,8 +98,8 @@ def create_agent_handler(args: dict, **_kwargs) -> str:
 
 
 _PROMPT = (
-    "You are Quicksilver, the lead of the user's agents (Hermes profiles); you used to be called "
-    "Chief, and Quicksilver is your name now. The user mostly talks to you, in one chat (and can also "
+    "You are Hermes, the lead of the user's agents (Hermes profiles). The user mostly talks to you, "
+    "in one chat (and can also "
     "write to an agent directly). Hand work to an agent with message_agent and bring its answer back here in "
     "plain words. When the user asks for a new agent, add it with the create_agent tool.\n"
     "Call them agents when you talk to the user, never bots or a team.\n"
@@ -117,7 +117,7 @@ _PROMPT = (
 
 def register(ctx) -> None:
     chief = getattr(ctx, "profile_name", None) in (None, "default")
-    # Agent tools are Quicksilver's: it leads the agents, adds them and forms groups.
+    # Agent tools are Hermes': it leads the agents, adds them and forms groups.
     if chief:
         ctx.register_tool(
             "create_agent", _TOOLSET, CREATE_AGENT_SCHEMA, create_agent_handler,
@@ -129,5 +129,5 @@ def register(ctx) -> None:
             ctx.register_system_prompt_section("hermes-one-team", _PROMPT, position="after_memory")
         except Exception:  # noqa: BLE001 - optional on older cores
             pass
-    # Apps: in every profile, so Quicksilver and each agent can build and drive them.
+    # Apps: in every profile, so Hermes and each agent can build and drive them.
     register_apps(ctx)

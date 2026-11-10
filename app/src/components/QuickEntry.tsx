@@ -14,7 +14,7 @@ export function QuickEntry() {
   return (
     <div className="qe">
       <BotFace profile="default" size={34} watch={false} />
-      <input ref={input} value={text} placeholder="Ask Quicksilver anything" spellCheck
+      <input ref={input} value={text} placeholder="Ask Hermes anything" spellCheck
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') { e.preventDefault(); void window.hermesNative.quickHide?.() }

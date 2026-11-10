@@ -49,13 +49,13 @@ function ChatSearch({ open, onClose }: { open: boolean; onClose: () => void }) {
         else if (e.key === 'ArrowUp') { e.preventDefault(); setSel(Math.max(0, sel - 1)) }
         else if (e.key === 'Enter') { e.preventDefault(); go(sel) }
       }}>
-        <Search value={q} onChange={setQ} placeholder="Search your chat with Quicksilver" autoFocus />
+        <Search value={q} onChange={setQ} placeholder="Search your chat with Hermes" autoFocus />
         <div className="cs-results" ref={list}>
           {q.trim().length < 2 ? <p className="free">Type a word or two. Everything in this chat that’s loaded is searched.</p>
             : !hits.length ? <p className="free">Nothing matches “{q.trim()}”.</p>
             : hits.map((m, i) => {
               const sn = snippet(m.text, q.trim())
-              const who = m.role === 'user' ? 'You' : m.role === 'command' ? m.command ?? 'Command' : m.from ? prettyName(m.from) : m.role === 'notice' ? 'Note' : 'Quicksilver'
+              const who = m.role === 'user' ? 'You' : m.role === 'command' ? m.command ?? 'Command' : m.from ? prettyName(m.from) : m.role === 'notice' ? 'Note' : 'Hermes'
               return (
                 <button key={m.id} className={`cs-hit${i === sel ? ' on' : ''}`} onMouseEnter={() => setSel(i)} onClick={() => go(i)}>
                   <span className="cs-who">{who}<em>{m.at ? new Date(m.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : ''}</em></span>

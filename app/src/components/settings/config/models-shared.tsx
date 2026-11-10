@@ -8,7 +8,7 @@ import { confirm } from '../../ui'
 /** "Chief" for the default profile, else the bot's name. */
 export function useNameOf() {
   const bots = useStore((s) => s.bots)
-  return (profile: string) => (profile === 'default' ? 'Quicksilver' : bots.find((b) => b.profile === profile)?.name ?? profile)
+  return (profile: string) => (profile === 'default' ? 'Hermes' : bots.find((b) => b.profile === profile)?.name ?? profile)
 }
 
 /**

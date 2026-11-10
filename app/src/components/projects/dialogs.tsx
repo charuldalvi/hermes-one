@@ -13,7 +13,7 @@ export function assigneeOptions(bots: Bot[], extra: string[] = [], anyone = 'Any
   const out: Option[] = [{ value: '', label: anyone, hint: 'Hermes picks', icon: <Face profile={null} bots={bots} size={20} /> }]
   for (const b of [...bots].sort((a, c) => (a.isChief ? -1 : c.isChief ? 1 : a.name.localeCompare(c.name)))) {
     names.add(b.profile)
-    out.push({ value: b.profile, label: b.isChief ? 'Quicksilver' : b.name, hint: b.isChief ? 'Leads your agents' : b.role?.slice(0, 40), icon: <Face profile={b.profile} bots={bots} size={20} /> })
+    out.push({ value: b.profile, label: b.isChief ? 'Hermes' : b.name, hint: b.isChief ? 'Leads your agents' : b.role?.slice(0, 40), icon: <Face profile={b.profile} bots={bots} size={20} /> })
   }
   for (const p of extra) if (p && !names.has(p)) { names.add(p); out.push({ value: p, label: botName(p, bots), icon: <Face profile={p} bots={bots} size={20} /> }) }
   return out

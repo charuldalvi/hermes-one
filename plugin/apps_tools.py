@@ -1,6 +1,6 @@
 """Hermes One apps: tools for building small live apps that show up in the Hermes One Mac app.
 
-Agents (Quicksilver and every other agent) write an app as a folder of files in one shared place,
+Agents (Hermes and every other agent) write an app as a folder of files in one shared place,
 ``<hermes root>/hermes-one/apps-src/<id>/`` (``~/.hermes/hermes-one/apps-src/<id>/``), then call
 ``publish_app``. Hermes One (the Electron app) test-runs it in a sandbox, keeps the last ten versions
 and shows it on its Apps page and as an Open card under the agent's reply.
@@ -51,7 +51,7 @@ def _profile() -> str:
 
 
 def apps_src() -> Path:
-    """Where app sources live: one folder for all the agents, so Quicksilver can fix any agent's app."""
+    """Where app sources live: one folder for all the agents, so Hermes can fix any agent's app."""
     override = os.environ.get("HERMES_ONE_APPS_SRC", "").strip()
     return Path(override).expanduser() if override else _root_home() / "hermes-one" / "apps-src"
 
@@ -266,8 +266,8 @@ Rules that keep apps working:
 - `ctx.hermes.files.read(path)` / `ctx.hermes.files.write(name, data)` / `ctx.hermes.files.exists(path)`:
   relative paths are in the data folder. `read(path, 'base64')` or `read(path, null)` for bytes.
 - `ctx.hermes.update()`: redraw open screens now.
-- `ctx.hermes.chat(bot, text)`: say something in the chat as the user (it goes to Quicksilver, marked as
-  from this app; name an agent (its profile) to have Quicksilver pass it on). Only when the user tapped something that
+- `ctx.hermes.chat(bot, text)`: say something in the chat as the user (it goes to Hermes, marked as
+  from this app; name an agent (its profile) to have Hermes pass it on). Only when the user tapped something that
   clearly asks for it.
 - `ctx.hermes.perform(action)`: run an action now, even if the app isn't open (play audio, a toast,
   `{ do: 'open', screen }` to show a screen).
@@ -339,7 +339,7 @@ What a tap does. An action is an object with `do`:
 | `link` | `url` | opens a web page in the browser |
 | `share` / `copy` | `text` | copies to the clipboard |
 | `toast` | `text` | a short message at the bottom |
-| `chat` | `bot`, `text` | says `text` in the chat (to Quicksilver, or through Quicksilver to `bot`) and shows it |
+| `chat` | `bot`, `text` | says `text` in the chat (to Hermes, or through Hermes to `bot`) and shows it |
 | `pick` | `kind` (`photo` `video` `camera` `file`), `act`, `args?`, `types?` (like `[".pdf"]`) | the user picks a file on the Mac; it's copied into the app's data folder (`uploads/`), then `actions[act]` runs with `{ file: { path, name, size, type } }` added to args. Show it with `ctx.hermes.files.url(file.path)` |
 | `locate` | `act`, `args?` | asks macOS where the Mac is, then runs `actions[act]` with `{ lat, lon, accuracy, at }` |
 | `notify` | `title`, `text`, `at?`, `id?`, `cancel?` | the same as `ctx.hermes.notify`, from a tap |
@@ -404,7 +404,7 @@ status board, a "who's busy" widget. `ctx.hermes.agents()` (and, in a web page, 
   talks:  [{ id, at, from, to: [agent ids], kind, group? }] }
 ```
 
-- `id` is the agent's profile name; `'default'` is Quicksilver, the lead (`lead: true`), which hands work out.
+- `id` is the agent's profile name; `'default'` is Hermes, the lead (`lead: true`), which hands work out.
 - `status`: `free`, `working`, `needs` (waiting on the user), `asleep` or `error`; `doing` says what (a short
   phrase like "Searching the web" or "In Coding crew"), `since` when it started (ms).
 - `look` is the agent's own bead, the same as in Hermes One's sidebar: draw each agent in its `color`.

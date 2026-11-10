@@ -20,7 +20,7 @@ export interface CTask { t: kb.KTask; w: kb.Work }
 
 export function botName(profile: string | null | undefined, bots: Bot[]): string {
   if (!profile) return 'Anyone'
-  if (profile === 'default') return 'Quicksilver'
+  if (profile === 'default') return 'Hermes'
   return bots.find((b) => b.profile === profile)?.name ?? prettyName(profile)
 }
 

@@ -1,11 +1,11 @@
-// An agent's Quicksilver: Hermes Remote's QuicksilverAvatar (a soft disc of the agent's colour, its crew shape,
+// An agent's Hermes: Hermes Remote's HermesAvatar (a soft disc of the agent's colour, its crew shape,
 // its resting pose, live moods). The bead lives outside React and draws itself on its own clock.
 // `disc={false}` draws the bead on its own, with no round disc behind it: the agent's own shape and colour, always
 // in the plain front pose. Empty states always use it (the user's rules: the disc and the resting poses belong to
 // the sidebar and lists; an empty state shows the agent's own bead shape, facing front).
 import { useEffect, useRef } from 'react'
 // @ts-ignore plain JS engine
-import { Bead, POSES, poseFor, startQuicksilver } from '../quicksilver/engine.js'
+import { Bead, POSES, poseFor, startBeads } from '../bead/engine.js'
 import { lookOf } from '../lib/looks'
 
 export type Mood = 'idle' | 'thinking' | 'writing' | 'hand' | 'knock' | 'callout' | 'hop' | 'splash' | 'nod' | 'doze' | 'search'
@@ -19,7 +19,7 @@ export function BotFace({ profile, size, mood = 'idle', poseKey, watch, classNam
   const lookKey = look ? `${look.shape}/${look.color}/${look.pose}` : ''
   const bead = useRef<any>(null)
   useEffect(() => {
-    startQuicksilver()
+    startBeads()
     const b: any = new (Bead as any)({ size, profile, disc, watch: watch ?? size >= 40, badge: false })
     const pose = !disc ? POSES.Round : look ? ((POSES as Record<string, number[]>)[look.pose] ?? POSES.Round) : poseKey ? poseFor(poseKey) : POSES.Round
     b.eng.poseArr = pose; b.poseArr = pose

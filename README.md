@@ -1,11 +1,11 @@
 # Hermes One
 
-Your [Hermes Agent](https://github.com/NousResearch/hermes-agent) as **one chat with your lead agent, Quicksilver**, who builds and runs the rest of your agents.
+Your [Hermes Agent](https://github.com/NousResearch/hermes-agent) as **one chat with your lead agent, Hermes**, who builds and runs the rest of your agents.
 
 It comes in two parts, in this one repo:
 
 - **[The plugin](plugin/)** goes into Hermes. Your lead agent can add agents and arrange them into groups, and any agent can build small live apps. In Hermes Desktop it also adds a Hermes One look and a live view of the agent's own browser.
-- **[The app](app/)** is a desktop app for Mac and Windows. It shows your agents in a sidebar, each with its own face, and one chat with Quicksilver. Beside the chat it shows the agent's browser, its screen (on Linux servers) and its terminal, plus the apps your agents build.
+- **[The app](app/)** is a desktop app for Mac and Windows. It shows your agents in a sidebar, each with its own face, and one chat with Hermes. Beside the chat it shows the agent's browser, its screen (on Linux servers) and its terminal, plus the apps your agents build.
 
 Hermes One is a community project. It is not made by or affiliated with Nous Research.
 
@@ -39,9 +39,9 @@ In Hermes Desktop, the plugin's look and browser view stay off until you turn th
 ## What you get
 
 **In the app**
-- One chat with Quicksilver, with no threads. It has a model chip with a thinking slider, slash commands, attachments, dictation and a hands-free **Talk** mode.
+- One chat with Hermes, with no threads. It has a model chip with a thinking slider, slash commands, attachments, dictation and a hands-free **Talk** mode.
 - **Your agents** in the sidebar, each with its own face, mood and status. Click one to talk to it directly.
-  - Quicksilver adds agents and arranges them into groups by craft.
+  - Hermes adds agents and arranges them into groups by craft.
   - Group chats have a lead, @mentions and approvals.
   - Anything that needs you (an approval, a question, a password) shows up as a card.
 - **Beside the chat:**

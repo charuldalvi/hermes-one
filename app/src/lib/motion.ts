@@ -1,7 +1,7 @@
 // Spring motion, after Hermes Remote's Motion.kt: interruptible springs that keep their velocity when
 // retargeted, stepped in fixed 1/240 s substeps so stiff springs stay stable when a frame drops.
 // @ts-ignore engine is plain JS
-import { Sp, REDUCED } from '../quicksilver/engine.js'
+import { Sp, REDUCED } from '../bead/engine.js'
 
 export const SPRING = {
   press: [1100, 0.85], release: [480, 0.5], fluid: [380, 0.8], pop: [520, 0.42], screen: [300, 0.9],

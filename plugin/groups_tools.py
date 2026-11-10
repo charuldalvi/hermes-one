@@ -1,8 +1,8 @@
-"""Quicksilver's group tools: list_agents, arrange_groups, create_group, update_group and list_groups.
+"""Hermes' group tools: list_agents, arrange_groups, create_group, update_group and list_groups.
 
-Quicksilver keeps the agents arranged in groups by craft (a "Film crew", a "Research desk"): list_agents shows
-every agent's role and the groups there are, and arrange_groups applies Quicksilver's whole arrangement at once.
-Groups Quicksilver arranged are remembered in <root>/hermes-one/arranged-groups.json, so a later arrangement
+Hermes keeps the agents arranged in groups by craft (a "Film crew", a "Research desk"): list_agents shows
+every agent's role and the groups there are, and arrange_groups applies Hermes' whole arrangement at once.
+Groups Hermes arranged are remembered in <root>/hermes-one/arranged-groups.json, so a later arrangement
 can retire the ones it no longer wants; groups the user made are never touched by it.
 
 A group is a Bot Mode room of 2 to 6 agents that work together. Rooms live behind the local gateway's
@@ -163,7 +163,7 @@ def _save_arranged(ids: set[str]) -> None:
 
 
 def _handle(profile: str) -> str:
-    return "quicksilver" if profile == "default" else profile
+    return "hermes" if profile == "default" else profile
 
 
 def _roster(members: list[str]) -> list[dict]:
@@ -172,7 +172,7 @@ def _roster(members: list[str]) -> list[dict]:
     roster = []
     for raw in members:
         name = str(raw).strip().lstrip("@").lower()
-        if name in ("chief", "quicksilver"):
+        if name in ("hermes",):
             name = "default"
         if not HANDLE_RE.match(name):
             raise ValueError(f"'{raw}' isn't an agent name")
@@ -181,7 +181,7 @@ def _roster(members: list[str]) -> list[dict]:
         if name in seen:
             raise ValueError(f"'{raw}' is listed twice")
         seen.add(name)
-        handle = "quicksilver" if name == "default" else name
+        handle = "hermes" if name == "default" else name
         roster.append({"member_id": name, "profile": name, "handle": handle, "target": {"kind": "local", "profile": name}})
     if not 2 <= len(roster) <= 6:
         raise ValueError("A group needs 2 to 6 agents")
@@ -198,7 +198,7 @@ def _find_room(rooms: list[dict], group: str) -> dict | None:
 
 def _member_id(name: str) -> str:
     n = str(name).strip().lstrip("@").lower()
-    return "default" if n in ("chief", "quicksilver") else n
+    return "default" if n in ("hermes",) else n
 
 
 def _lead_context(room_id: str, lead: str | None, purpose: str | None, keep: dict | None = None) -> tuple[str, dict] | None:
@@ -317,15 +317,15 @@ def list_agents(args: dict, **_: Any) -> str:
             c = ctx.get(r.get("room_id"), {})
             groups.append({"name": r.get("name"), "members": members, "lead": _handle(c["lead_member_id"]) if c.get("lead_member_id") else None,
                            "purpose": c.get("purpose") or "", "arranged_by_you": r.get("room_id") in mine})
-        loose = [b["name"] for b in agents if b["name"] != "quicksilver" and b["name"] not in in_group]
+        loose = [b["name"] for b in agents if b["name"] != "hermes" and b["name"] not in in_group]
         return _ok(agents=agents, groups=groups, not_in_any_group=loose)
     except Exception as exc:
         return _fail(str(exc))
 
 
 def arrange_groups(args: dict, **_: Any) -> str:
-    """Applies Quicksilver's whole arrangement: makes the groups that don't exist, changes the ones whose members,
-    lead or purpose differ (members can't change in place, so those are replaced), and retires groups Quicksilver
+    """Applies Hermes' whole arrangement: makes the groups that don't exist, changes the ones whose members,
+    lead or purpose differ (members can't change in place, so those are replaced), and retires groups Hermes
     arranged before that aren't in the new arrangement. Groups the user made are left alone."""
     try:
         if "groups" not in args:
@@ -415,7 +415,7 @@ ARRANGE_SCHEMA = {
         "Arrange the agents into groups by craft, like a studio's 'Film crew' or 'Research desk'. Give the WHOLE "
         "arrangement each time: groups that don't exist are made, ones whose members, lead or purpose differ are "
         "changed, and groups you arranged before that aren't listed are retired. Groups the user made are left alone. "
-        "Each group has 2 to 6 members (agent names, never 'quicksilver': you already lead everyone) who really do the same "
+        "Each group has 2 to 6 members (agent names, never 'hermes': you already lead everyone) who really do the same "
         "kind of work or hand work to each other. An agent with no partner in its craft stays out of every group; "
         "never pair unrelated agents to fill one. An empty list retires every group you arranged."
     ),
@@ -432,7 +432,7 @@ ARRANGE_SCHEMA = {
 
 CREATE_SCHEMA = {
     "name": "create_group",
-    "description": "Create a group: a room where 2 to 6 agents work together on something. Use it when work needs several agents at once. Members are agent names (profiles); include 'quicksilver' to take part yourself. Optionally pick a lead agent who receives messages first, and a purpose.",
+    "description": "Create a group: a room where 2 to 6 agents work together on something. Use it when work needs several agents at once. Members are agent names (profiles); include 'hermes' to take part yourself. Optionally pick a lead agent who receives messages first, and a purpose.",
     "parameters": {"type": "object", "properties": {
         "name": {"type": "string", "description": "Short name, e.g. 'Launch video'"},
         "members": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 6, "description": "Agent names (profiles)"},

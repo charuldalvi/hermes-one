@@ -63,7 +63,7 @@ export function JobEditor({ open, onClose, job, initialProfile = 'default', onSa
   const set = (p: Partial<Sched>) => { setSchedTouched(true); setSched((s) => ({ ...s, ...p })) }
 
   const botOptions: Option[] = useMemo(() => [...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))).map((b) => ({
-    value: b.profile, label: b.isChief ? 'Quicksilver' : b.name, hint: b.role?.slice(0, 36), icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} />,
+    value: b.profile, label: b.isChief ? 'Hermes' : b.name, hint: b.role?.slice(0, 36), icon: <BotFace profile={b.profile} size={20} poseKey={b.poseKey} watch={false} />,
   })), [bots])
   const modelOpts: Option[] = useMemo(() => {
     const out: Option[] = [{ value: '', label: 'The agent’s own model', hint: 'Default' }]
@@ -126,7 +126,7 @@ export function JobEditor({ open, onClose, job, initialProfile = 'default', onSa
       </>}>
       <div className="sy-form">
         {edit ? (
-          <div className="sy-inline"><BotFace profile={profile} size={22} poseKey={bot?.poseKey} watch={false} /><span>Runs as <b style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{bot ? (bot.isChief ? 'Quicksilver' : bot.name) : profile}</b></span></div>
+          <div className="sy-inline"><BotFace profile={profile} size={22} poseKey={bot?.poseKey} watch={false} /><span>Runs as <b style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{bot ? (bot.isChief ? 'Hermes' : bot.name) : profile}</b></span></div>
         ) : (
           <Field label="Which agent runs it" hint="The job uses this agent’s skills, tools and memory.">
             <Select value={profile} options={botOptions} onChange={(p) => { setProfile(p); setTouchedDeliver(false); setSkills([]) }} width={360}
@@ -137,7 +137,7 @@ export function JobEditor({ open, onClose, job, initialProfile = 'default', onSa
           <input className="answer" value={name} onChange={(e) => setName(e.target.value)} placeholder="Morning news" />
         </Field>
         {scriptOnly ? (
-          <Field label="What it runs" hint="This job runs a script on your Mac instead of asking the agent. Change the script with Quicksilver or in the terminal.">
+          <Field label="What it runs" hint="This job runs a script on your Mac instead of asking the agent. Change the script with Hermes or in the terminal.">
             <div className="sy-text sy-mono">{job?.script}</div>
           </Field>
         ) : (

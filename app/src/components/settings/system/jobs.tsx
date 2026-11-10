@@ -143,7 +143,7 @@ export function targetLabel(id: string, bots: Bot[], targets?: DeliveryTarget[])
   const chat = /^bot-chat:(.+)$/.exec(id)
   if (chat) {
     const p = chat[1]
-    if (p === 'default') return 'Your chat with Quicksilver'
+    if (p === 'default') return 'Your chat with Hermes'
     const b = bots.find((x) => x.profile === p)
     return `${b?.name ?? prettyName(p)}’s chat`
   }

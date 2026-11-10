@@ -57,7 +57,7 @@ export async function arrangeTeam(why: { fresh?: string[]; gone?: string[]; aske
     : [why.fresh?.length ? `${why.fresh.length === 1 ? 'A new agent' : 'New agents'} since you last arranged the groups: ${names(why.fresh)}.` : '',
        why.gone?.length ? `${why.gone.length === 1 ? 'This agent has' : 'These agents have'} been removed but ${why.gone.length === 1 ? 'is' : 'are'} still in a group: ${names(why.gone)}.` : ''].filter(Boolean).join(' ')
   const text = `${reason} Arrange the agents into groups by craft: call list_agents to see every agent's role, then call arrange_groups with the whole arrangement. A group is 2 to 6 agents who really do the same kind of work or hand work to each other, with a short name like "Film crew", a lead and a one-line purpose. An agent with no partner in its craft stays on its own: don't pair unrelated agents, and don't put yourself in a group. Then answer in plain words, one short line per group (its name, who's in it, who leads it), and one line naming the agents who work on their own. Nothing else.`
-  try { await askChiefAside('Quicksilver is arranging the agents into groups', text, 'Working on it in the background. The groups appear in the sidebar when they’re ready.') }
+  try { await askChiefAside('Hermes is arranging the agents into groups', text, 'Working on it in the background. The groups appear in the sidebar when they’re ready.') }
   finally { asking = false }
 }
 

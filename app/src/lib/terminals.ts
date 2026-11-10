@@ -146,7 +146,7 @@ export async function backfill(profile: string) {
   const sid = liveSession(profile)
   if (!sid || !gateway.open) return
   let list: any[] = []
-  // The profile matters: without it Hermes looks among Quicksilver's commands and answers not_found.
+  // The profile matters: without it Hermes looks among Hermes' commands and answers not_found.
   try { list = (await gateway.request<any>('process.list', { session_id: sid, profile }, 10_000))?.processes ?? [] } catch { return }
   for (const e of list) {
     const pid = String(e.session_id ?? '')

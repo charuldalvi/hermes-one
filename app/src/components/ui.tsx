@@ -240,13 +240,13 @@ export function Select({ value, options, onChange, placeholder = 'Choose', width
 export function ProfilePicker({ value, onChange, label = 'For' }: { value: string; onChange: (p: string) => void; label?: string }) {
   const bots = useStore((s) => s.bots)
   const opts: Option[] = [...bots].sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))).map((b) => ({
-    value: b.profile, label: b.isChief ? 'Quicksilver' : b.name, hint: b.isChief ? 'Leads your agents' : b.role?.slice(0, 40),
+    value: b.profile, label: b.isChief ? 'Hermes' : b.name, hint: b.isChief ? 'Leads your agents' : b.role?.slice(0, 40),
     icon: <BotFace profile={b.profile} size={22} poseKey={b.poseKey} watch={false} />,
   }))
   return (
     <div className="pp"><span className="pl">{label}</span>
       <Select value={value} options={opts} onChange={onChange} width={320} align="end"
-        render={(o) => <>{o ? <BotFace profile={o.value} size={20} watch={false} /> : null}<span className="sv">{o?.label ?? 'Quicksilver'}</span></>} />
+        render={(o) => <>{o ? <BotFace profile={o.value} size={20} watch={false} /> : null}<span className="sv">{o?.label ?? 'Hermes'}</span></>} />
     </div>
   )
 }

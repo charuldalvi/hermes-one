@@ -16,7 +16,7 @@ import { useFlips } from './parts'
 
 export function useBotName(profile: string) {
   const name = useStore((s) => s.bots.find((b) => b.profile === profile)?.name)
-  return profile === 'default' ? 'Quicksilver' : name ?? prettyName(profile)
+  return profile === 'default' ? 'Hermes' : name ?? prettyName(profile)
 }
 
 export const kindLabel = (e: AppEntry) => (e.kind === 'managed' ? 'Managed' : e.kind === 'plugin' ? 'Plugin' : 'On this Mac')

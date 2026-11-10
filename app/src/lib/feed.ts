@@ -1,5 +1,5 @@
 // The agents feed, for Hermes One apps with the "agents" ability (an office view, a status board…):
-//   agents  every agent: id (its profile), name, role, whether it leads (Quicksilver), its own bead look
+//   agents  every agent: id (its profile), name, role, whether it leads (Hermes), its own bead look
 //           (shape, colour, pose), and live status: free, working, needs (waiting on you), asleep or error,
 //           with what it's doing and since when. Work inside a group counts as working.
 //   groups  each group: id, name, members (agent ids), lead.
@@ -30,7 +30,7 @@ let feed: Feed = { at: 0, agents: [], groups: [], talks: [] }
 let lastSig = ''
 const listeners = new Set<(f: Feed) => void>()
 
-/** Someone addressed someone: `from` and `to` are agent ids ('default' is Quicksilver) or 'you'. */
+/** Someone addressed someone: `from` and `to` are agent ids ('default' is Hermes) or 'you'. */
 export function recordTalk(t: Omit<Talk, 'id' | 'at'>) {
   const to = [...new Set(t.to.filter((x) => x && x !== t.from))]
   if (!t.from || !to.length) return
@@ -59,7 +59,7 @@ function build(): Feed {
     if (status === 'free' && inGroup.has(b.profile)) { status = 'working'; doing = `In ${inGroup.get(b.profile)}` }
     const since = status === 'working' ? (lead ? s.chief.turnStartedAt ?? b.since : b.since) : undefined
     return {
-      id: b.profile, name: lead ? 'Quicksilver' : b.name, lead, role: lead ? 'Leads your agents' : b.role,
+      id: b.profile, name: lead ? 'Hermes' : b.name, lead, role: lead ? 'Leads your agents' : b.role,
       look: lead ? LEAD_LOOK : lookOf(b.profile) ?? LEAD_LOOK, status, ...(doing ? { doing } : {}), ...(since ? { since } : {}),
     }
   })

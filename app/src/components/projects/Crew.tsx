@@ -46,7 +46,7 @@ export function CrewView({ cards, bots, onOpen, tick }: { cards: CTask[]; bots: 
   }, [cards, bots])
   const free = useMemo(() => bots.filter((b) => !members.some((m) => m.profile === b.profile)).sort((a, b) => (a.isChief ? -1 : b.isChief ? 1 : a.name.localeCompare(b.name))), [bots, members])
 
-  if (!members.length) return <Empty title="No one has work here yet" body="When Quicksilver hands out the work on this board, you’ll see who does what." />
+  if (!members.length) return <Empty title="No one has work here yet" body="When Hermes hands out the work on this board, you’ll see who does what." />
 
   return (
     <div className="pj-crew flow">
@@ -55,7 +55,7 @@ export function CrewView({ cards, bots, onOpen, tick }: { cards: CTask[]; bots: 
         <div className="pj-free">
           <span className="lab-s">Free on this board</span>
           <span className="faces">
-            {free.map((b) => <span key={b.profile} className="pj-freebot" title={b.isChief ? 'Quicksilver' : b.name}><Face profile={b.profile} bots={bots} size={26} /><span>{b.isChief ? 'Quicksilver' : b.name}</span></span>)}
+            {free.map((b) => <span key={b.profile} className="pj-freebot" title={b.isChief ? 'Hermes' : b.name}><Face profile={b.profile} bots={bots} size={26} /><span>{b.isChief ? 'Hermes' : b.name}</span></span>)}
           </span>
         </div>
       ) : null}

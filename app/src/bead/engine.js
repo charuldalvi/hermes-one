@@ -1,9 +1,9 @@
-// Quicksilver, ported from hermes-android master (ui/components/Quicksilver.kt and Crew.kt):
+// Hermes, ported from hermes-android master (ui/components/Hermes.kt and Crew.kt):
 // the mood engine, the bead shapes, the satin body, the eyes, the crew colours and shapes.
 // Units are the prototype's 120-unit box; every part rides its own spring in fixed 1/240 s substeps.
 /* eslint-disable */
 // =============================================================================================
-// Quicksilver, ported from hermes-android master: ui/components/Quicksilver.kt (QuicksilverEngine,
+// Hermes, ported from hermes-android master: ui/components/Hermes.kt (HermesEngine,
 // BeadShape, drawBody in satin, eyes) and Crew.kt (crew colours, shapes, badges). Units are the
 // prototype's 120-unit box; every part rides its own spring in fixed 1/240 s substeps.
 // =============================================================================================
@@ -333,7 +333,7 @@ class Bead {
 
 
 
-// -- Hermes Remote's six resting poses (Quicksilver.kt Pose): dx, dy, scale, tilt, eyeX, eyeY ---------
+// -- Hermes Remote's six resting poses (Hermes.kt Pose): dx, dy, scale, tilt, eyeX, eyeY ---------
 export const POSES = { Round: [0, 0, 1, 0, 0, 0], Peek: [0, .39, 1.3, 0, 0, -9], Corner: [.2, .31, 1.2, 0, -5, -9], Side: [-.36, .05, 1.2, 0, 14, -2], Hang: [0, -.39, 1.26, 0, 0, 22], Lean: [0, 0, 1, -16, 0, 0] };
 const POSE_ORDER = ['Round', 'Peek', 'Corner', 'Side', 'Hang', 'Lean'];
 /** Remote's Persona.of(key).pose: the chat id picks it, so a bot keeps its pose. */
@@ -346,7 +346,7 @@ const poseMoves = (p) => p[0] || p[1] || p[2] !== 1 || p[3];
 Engine.prototype.idle = function (t, mx, my) { const p = this.poseArr || POSES.Round; this.open(mx + p[4], my - 4 + p[5], 1, { shut: this.blink(t) }); };
 
 let started = false;
-export function startQuicksilver() {
+export function startBeads() {
   if (started) return; started = true;
   readTheme();
   // Light and dark follow the Mac (or This app's choice): re-read the colours and repaint every bead.

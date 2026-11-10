@@ -8,14 +8,14 @@ import { Icon } from '../lib/icons'
 import { BotFace, type Mood } from './BotFace'
 
 type Stage = 'listening' | 'hearing' | 'writing' | 'thinking' | 'speaking'
-const WORDS: Record<Stage, string> = { listening: 'Listening…', hearing: 'Go on, I’m listening', writing: 'Writing it down…', thinking: 'Quicksilver is thinking…', speaking: 'Speaking…' }
+const WORDS: Record<Stage, string> = { listening: 'Listening…', hearing: 'Go on, I’m listening', writing: 'Writing it down…', thinking: 'Hermes is thinking…', speaking: 'Speaking…' }
 const MOOD: Record<Stage, Mood> = { listening: 'idle', hearing: 'nod', writing: 'writing', thinking: 'thinking', speaking: 'callout' }
 
 export function TalkButton() {
   const [on, setOn] = useState(false)
   return (
     <>
-      <button className={`plus talkb${on ? ' on' : ''}`} title="Talk with Quicksilver" onClick={() => setOn(!on)}><Icon name="wave" size={17} /></button>
+      <button className={`plus talkb${on ? ' on' : ''}`} title="Talk with Hermes" onClick={() => setOn(!on)}><Icon name="wave" size={17} /></button>
       {on ? <TalkDock onEnd={() => setOn(false)} /> : null}
     </>
   )
@@ -114,9 +114,9 @@ function TalkDock({ onEnd }: { onEnd: () => void }) {
 
   const end = () => { alive.current = false; cleanup.current(); audio.current?.pause(); if (stage === 'thinking') void stopChief(); onEnd() }
   return (
-    <div className="talk" role="dialog" aria-label="Talking with Quicksilver">
+    <div className="talk" role="dialog" aria-label="Talking with Hermes">
       <div className="talk-bead"><div className="talk-ring" ref={lvl} /><BotFace profile="default" size={56} mood={MOOD[stage]} watch /></div>
-      <div className="talk-tx"><b>{WORDS[stage]}</b>{heard ? <span>“{heard.length > 120 ? heard.slice(0, 120) + '…' : heard}”</span> : <span>Speak naturally. Pause and Quicksilver answers out loud.</span>}</div>
+      <div className="talk-tx"><b>{WORDS[stage]}</b>{heard ? <span>“{heard.length > 120 ? heard.slice(0, 120) + '…' : heard}”</span> : <span>Speak naturally. Pause and Hermes answers out loud.</span>}</div>
       {stage === 'speaking' ? <button className="b-soft" onClick={() => { audio.current?.pause(); audio.current?.dispatchEvent(new Event('ended')) }}>Skip</button> : null}
       <button className="b-danger" onClick={end}>End</button>
     </div>
