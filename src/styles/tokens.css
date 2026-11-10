@@ -1,0 +1,166 @@
+/*
+ * Hermes One: design tokens.
+ *
+ * FOR ANY AGENT EDITING THE UI: take every colour, size, space, radius and duration from this file.
+ * Never invent a value (no 13.5px fonts, no 10px gaps). If a value you need is missing, or is marked
+ * ASK FIRST, stop and ask the maintainer instead of guessing: a guess quietly becomes part of the product.
+ *
+ * Layer 1 = primitives (raw values; components never use these directly).
+ * Layer 2 = semantic tokens (what a value is for; components use only these).
+ *
+ * Structure after rico's "Build the design system and skills your agent can follow". Light (the block at
+ * the end) flips the grey ramp, so every semantic token follows.
+ */
+
+:root {
+  /* ---------- Layer 1: primitives ---------- */
+
+  /* Neutrals, measured. Never pure black: the app sits on gray-925. */
+  --gray-0: #ffffff;
+  --gray-100: #dcdcdc;
+  --gray-400: #9e9e9e;
+  --gray-500: #777777;
+  --gray-600: #505050;
+  --gray-800: #333333;
+  --gray-850: #292929;
+  --gray-875: #242424;
+  --gray-900: #1f1f1f;
+  --gray-925: #1a1a1a;
+  --gray-950: #161616;
+
+  /* Status hues (only ever used through the status tokens below). */
+  --blue-500: #3b82f6;
+  --green-500: #22c55e;
+  --amber-500: #f59e0b;
+  --red-500: #ef4444;
+
+  /* Type. The reference reads as Inter; mono is for machine text only. */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --text-2xs: 11px;     /* only the sidebar's row of page icons (approved in the A + B mockup, 2026-11-09) */
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;      /* sidebar rows, headers, chips (measured) */
+  --text-lg: 16px;      /* reading text in the chat (measured) */
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-reading: 1.625; /* 16 / 26, measured in the chat */
+
+  /* Spacing: a 4 px grid. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;    /* the composer card (measured, about 16) */
+  --radius-full: 9999px;
+
+  /* Shadow: the reference uses almost none; edges come from tone, not shadow. */
+  --shadow-none: none;
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.35);
+
+  /* Motion: ASK FIRST. The app's own motion uses springs (interruptible, velocity-aware); the article
+     uses easing curves. Until decided, use these only for hovers and colour fades. */
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+
+  /* ---------- Layer 2: semantic tokens ---------- */
+
+  /* Surfaces */
+  --bg-app: var(--gray-925);          /* sidebar, chat and right panel all share it */
+  --bg-raised: var(--gray-900);       /* composer card, plan and approval cards, the composer's top strip */
+  --bg-selected: var(--gray-850);     /* your message bubble, the selected chip, the selected sidebar row */
+  --bg-hover: var(--gray-900);        /* ASK FIRST: not visible in the reference */
+  --border-divider: var(--gray-875);  /* between columns: nearly invisible, space does the separating */
+  --border-card: var(--gray-850);     /* edge of raised cards */
+
+  /* Text */
+  --text-primary: var(--gray-100);    /* reading text; never pure white */
+  --text-secondary: var(--gray-400);  /* labels, sidebar rows, "Worked for 3m" */
+  --text-icon: var(--gray-500);       /* header and toolbar icons */
+  --text-placeholder: var(--gray-600);
+  /* Status text on a tinted fill (an error line, a warning): light shades on dark, deep shades on light. */
+  --tint-red: #fca5a5;
+  --tint-amber: #fcd34d;
+  --tint-green: #86efac;
+  --tint-blue: #93c5fd;
+  --shimmer: rgb(255 255 255 / 0.025); /* loading skeletons */
+  --bg-frost: rgb(31 31 31 / 0.92);    /* the quick-entry bar over other apps */
+
+  /* Action */
+  --action-primary: var(--gray-0);    /* the one white button per screen */
+  --action-primary-text: var(--gray-925);
+  --action-disabled: var(--gray-800); /* e.g. the send button before you type */
+  --focus-ring: var(--blue-500);
+
+  /* Status: colour only when it means something */
+  --status-running: var(--blue-500);  /* a bot is working */
+  --status-success: var(--green-500); /* done */
+  --status-needs-you: var(--amber-500); /* waiting on your decision or answer */
+  --status-error: var(--red-500);     /* went wrong */
+
+  /* Layout (measured at 1x) */
+  --sidebar-width: 300px;
+  --header-height: 56px;
+  --row-pitch: 35px;                  /* sidebar rows */
+  --composer-strip-height: 40px;      /* "Chief · Leads your team" */
+  --gap-inline: var(--space-2);
+  --gap-stack: var(--space-4);
+  --gap-message: var(--space-10);     /* between turns in the chat */
+  --padding-sidebar: var(--space-5);
+  --padding-column: var(--space-10);
+  --radius-control: var(--radius-md);
+  --radius-card: var(--radius-lg);
+  --radius-composer: var(--radius-xl);
+  --radius-chip: var(--radius-full);
+
+  /* Motion */
+  --motion-hover: var(--duration-fast) var(--ease-smooth);
+  --motion-enter: var(--duration-normal) var(--ease-smooth);
+}
+
+/* ---------- Light: follows the Mac's appearance (Settings › This app can pin light or dark) ----------
+ * The grey ramp flips, so surfaces, hairlines and text follow through the semantic tokens; the one
+ * primary button turns near-black with light text. Status hues deepen a step to stay readable on white. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --gray-0: #1a1a1a;
+    --gray-100: #1a1a1a;
+    --gray-400: #6b6b6b;
+    --gray-500: #8a8a8a;
+    --gray-600: #ababab;
+    --gray-800: #d4d4d4;
+    --gray-850: #ebebeb;
+    --gray-875: #e6e6e6;
+    --gray-900: #ffffff;
+    --gray-925: #f7f7f7;
+    --gray-950: #efefef;
+    --blue-500: #2563eb;
+    --green-500: #16a34a;
+    --amber-500: #d97706;
+    --red-500: #dc2626;
+    --tint-red: #b91c1c;
+    --tint-amber: #b45309;
+    --tint-green: #15803d;
+    --tint-blue: #1d4ed8;
+    --shimmer: rgb(0 0 0 / 0.035);
+    --bg-frost: rgb(255 255 255 / 0.9);
+    --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.12), 0 0 0 1px rgb(0 0 0 / 0.05);
+  }
+}

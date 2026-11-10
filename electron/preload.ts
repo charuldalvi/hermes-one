@@ -1,0 +1,51 @@
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
+import { appsBridge } from './apps-preload'
+
+contextBridge.exposeInMainWorld('hermesNative', {
+  apps: appsBridge(ipcRenderer),
+  endpoint: (refresh?: boolean) => ipcRenderer.invoke('hermes:endpoint', !!refresh),
+  ticket: (purpose?: string, profileHome?: string) => ipcRenderer.invoke('hermes:ticket', purpose ?? 'interactive', profileHome),
+  rest: (method: string, pathname: string, body?: unknown) => ipcRenderer.invoke('hermes:rest', method, pathname, body),
+  reveal: (p: string) => ipcRenderer.invoke('hermes:reveal', p),
+  askMic: () => ipcRenderer.invoke('hermes:mic'),
+  loginItem: (on?: boolean) => ipcRenderer.invoke('hermes:login-item', on),
+  theme: (choice?: 'system' | 'light' | 'dark') => ipcRenderer.invoke('hermes:theme', choice),
+  frosted: (on?: boolean) => ipcRenderer.invoke('hermes:frosted', on),
+  scale: (v?: number) => ipcRenderer.invoke('hermes:scale', v),
+  onScale: (cb: (v: number) => void) => { const f = (_e: unknown, v: number) => cb(v); ipcRenderer.on('hermes:scale', f); return () => ipcRenderer.removeListener('hermes:scale', f) },
+  pickPicture: () => ipcRenderer.invoke('hermes:picture-pick'),
+  removePicture: () => ipcRenderer.invoke('hermes:picture-remove'),
+  picture: () => ipcRenderer.invoke('hermes:picture'),
+  fetchPublic: (url: string) => ipcRenderer.invoke('hermes:fetch-public', url),
+  quickSend: (text: string, open: boolean) => ipcRenderer.invoke('hermes:quick-send', text, open),
+  quickHide: () => ipcRenderer.invoke('hermes:quick-hide'),
+  onQuickSend: (cb: (text: string) => void) => { const f = (_e: unknown, t: string) => cb(t); ipcRenderer.on('hermes:quick-send', f); return () => ipcRenderer.removeListener('hermes:quick-send', f) },
+  onQuickShown: (cb: () => void) => { const f = () => cb(); ipcRenderer.on('hermes:quick-shown', f); return () => ipcRenderer.removeListener('hermes:quick-shown', f) },
+  openPath: (p: string) => ipcRenderer.invoke('hermes:open-path', p),
+  openExternal: (url: string) => ipcRenderer.invoke('hermes:open', url),
+  badge: (count: number) => ipcRenderer.invoke('hermes:badge', count),
+  pickFiles: () => ipcRenderer.invoke('hermes:pick-files'),
+  stageImages: (files: { path: string; mime: string }[], profileHome?: string) => ipcRenderer.invoke('hermes:stage-images', files, profileHome),
+  describeFile: (file: File) => ipcRenderer.invoke('hermes:describe-file', webUtils.getPathForFile(file)),
+  savePasted: (base64: string, ext: string) => ipcRenderer.invoke('hermes:save-pasted', base64, ext),
+  notify: (title: string, body: string) => ipcRenderer.invoke('hermes:notify', title, body),
+  canFrost: () => ipcRenderer.invoke('hermes:can-frost') as Promise<boolean>,
+  // Systems: Hermes on this computer or another (Tailscale/address or SSH), one at a time.
+  systems: () => ipcRenderer.invoke('hermes:systems'),
+  switchSystem: (id: string) => ipcRenderer.invoke('hermes:system-switch', id),
+  addSystem: (input: Record<string, unknown>) => ipcRenderer.invoke('hermes:system-add', input),
+  signInSystem: (id: string, password: string) => ipcRenderer.invoke('hermes:system-signin', id, password),
+  removeSystem: (id: string) => ipcRenderer.invoke('hermes:system-remove', id),
+  browserList: () => ipcRenderer.invoke('browser:list'),
+  browserWatch: (profile: string) => ipcRenderer.invoke('browser:watch', profile),
+  browserAct: (action: Record<string, unknown>) => ipcRenderer.invoke('browser:act', action),
+  browserUnwatch: () => ipcRenderer.invoke('browser:unwatch'),
+  onBrowserEvent: (cb: (ev: any) => void) => { const f = (_e: unknown, ev: any) => cb(ev); ipcRenderer.on('browser:event', f); return () => ipcRenderer.removeListener('browser:event', f) },
+  // Snapshot runs on a Mac can draw the Windows look (HERMES_ONE_PLATFORM=win32) to check it.
+  platform: (process.env.HERMES_ONE_SNAPSHOT && process.env.HERMES_ONE_PLATFORM) || process.platform,
+  // Development only: point Chief's chat at a scratch session for end-to-end tests.
+  testChiefSession: process.env.HERMES_ONE_CHIEF_SESSION || null,
+  // Off-screen test copies only: point an agent's chat at a hidden test session (HERMES_ONE_TEST_SESSIONS="researcher=<id>,…").
+  testSessions: process.env.HERMES_ONE_SNAPSHOT ? process.env.HERMES_ONE_TEST_SESSIONS || null : null,
+  snapshot: !!process.env.HERMES_ONE_SNAPSHOT,
+})

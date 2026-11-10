@@ -1,0 +1,9 @@
+{
+  "name": "Habits",
+  "icon": "check",
+  "color": "green",
+  "description": "Tick off daily habits, keep streaks, and get a nudge in the evening",
+  "read": [],
+  "abilities": ["notify"],
+  "background": false
+}

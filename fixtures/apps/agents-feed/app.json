@@ -1,0 +1,1 @@
+{ "name": "Agents feed", "icon": "users", "color": "violet", "description": "Every agent in its colour, and a line each time one addresses another", "read": [], "abilities": ["agents", "web"], "background": false }

@@ -1,0 +1,116 @@
+/* Scheduled, Messaging and System pages. Same tokens and rules as pages.css: surfaces var(--gray-925) /
+   var(--gray-900) / var(--gray-850), colour only for meaning, one white button per screen. Everything is prefixed
+   sy- so it can't leak into the other pages. */
+
+/* ---------- forms in dialogs ---------- */
+.sy-form { display: grid; gap: 16px; padding-top: 4px; }
+.sy-f { display: grid; gap: 7px; min-width: 0; }
+.sy-f > .lb { font-size: var(--text-sm); color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+.sy-f > .lb em { font-style: normal; color: var(--text-icon); font-size: var(--text-xs); }
+.sy-f > .sy-hint { font-size: var(--text-xs); color: var(--text-icon); line-height: 18px; }
+.sy-f > .sy-hint.bad { color: var(--tint-red); }
+.sy-f .sel { width: 100%; }
+.sy-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sy-inline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--text-base); color: var(--text-secondary); }
+.sy-inline .answer { width: auto; }
+.sy-inline .sel, .sy-f .sy-inline .sel { width: auto; }
+.sy-inline input[type="number"] { width: 84px; }
+.sy-inline input[type="time"], .sy-inline input[type="datetime-local"] { width: auto; color-scheme: dark; }
+.sy-summary { font-size: var(--text-base); color: var(--text-primary); background: var(--bg-app); border-radius: 8px; padding: 9px 12px; box-shadow: inset 0 0 0 1px var(--gray-875); display: flex; gap: 8px; align-items: center; }
+.sy-summary .ic { color: var(--text-icon); }
+
+/* toggle chips (delivery targets, skills, events) */
+.sy-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sy-chip { height: 28px; padding: 0 10px; border-radius: 7px; font-size: var(--text-sm); color: var(--text-secondary); background: var(--bg-app); box-shadow: inset 0 0 0 1px var(--gray-850); display: inline-flex; align-items: center; gap: 6px; transition: background .15s, color .15s, transform 160ms cubic-bezier(.34, 1.56, .64, 1); max-width: 100%; }
+.sy-chip > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sy-chip:hover { background: var(--bg-selected); color: var(--text-primary); }
+.sy-chip:active { transform: scale(.95); }
+.sy-chip.on { background: var(--bg-selected); color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--gray-800); }
+.sy-chip .ic { color: var(--text-icon); }
+.sy-chip.on .ic { color: var(--text-primary); }
+.sy-chip.mono { font-family: var(--font-mono); font-size: var(--text-xs); }
+
+/* folds ("More options") */
+.sy-fold { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--text-secondary); height: 26px; }
+.sy-fold:hover { color: var(--text-primary); }
+.sy-fold .ic { transition: transform 260ms var(--spring-soft); }
+.sy-fold[aria-expanded="true"] .ic { transform: rotate(90deg); }
+.sy-reveal { animation: flowin 360ms var(--spring-soft) both; }
+
+/* ---------- read-outs ---------- */
+.sy-log { font-family: var(--font-mono); font-size: var(--text-xs); line-height: 18px; color: var(--gray-100); background: var(--bg-app); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--gray-875); padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; overflow-y: auto; max-height: 260px; user-select: text; scrollbar-width: thin; scrollbar-color: var(--gray-850) transparent; margin: 0; }
+.sy-log.tall { max-height: min(62vh, 640px); min-height: 220px; }
+.sy-log .w { color: var(--tint-amber); } .sy-log .e { color: var(--tint-red); } .sy-log .d { color: var(--text-icon); }
+.sy-log .hit { background: rgba(59, 130, 246, .22); color: var(--text-primary); border-radius: 3px; }
+.sy-text { font-size: var(--text-base); line-height: 22px; color: var(--text-primary); background: var(--bg-app); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--gray-875); padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; max-height: 240px; overflow-y: auto; }
+.sy-out { background: var(--bg-app); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--gray-875); padding: 12px 14px; max-height: 360px; overflow-y: auto; }
+.sy-out.md { font-size: var(--text-base); line-height: 22px; }
+.sy-out.md p { margin: 0 0 10px; }
+.sy-copy { display: flex; align-items: center; gap: 8px; min-width: 0; background: var(--bg-app); border-radius: 8px; box-shadow: inset 0 0 0 1px var(--gray-875); padding: 0 4px 0 12px; height: 36px; }
+.sy-copy code { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: text; }
+.sy-note { font-size: var(--text-sm); color: var(--text-secondary); line-height: 20px; margin: 10px 2px 0; }
+.sy-note.bad { color: var(--tint-red); }
+.sy-warn { display: flex; align-items: flex-start; gap: 10px; font-size: var(--text-base); color: var(--text-secondary); line-height: 21px; padding: 11px 14px; border-radius: 10px; background: rgba(245, 158, 11, .07); box-shadow: inset 0 0 0 1px rgba(245, 158, 11, .2); margin-bottom: 14px; }
+.sy-warn.bad { background: rgba(239, 68, 68, .07); box-shadow: inset 0 0 0 1px rgba(239, 68, 68, .18); }
+.sy-warn .dot { margin-top: 7px; }
+.sy-warn .tx { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.sy-warn .tx b { color: var(--text-primary); font-weight: var(--weight-medium); }
+.sy-warn .act { display: flex; gap: 6px; flex: none; margin: -4px -4px -4px 0; }
+.sy-err { font-size: var(--text-sm); color: var(--tint-red); line-height: 19px; overflow-wrap: anywhere; }
+.sy-mono { font-family: var(--font-mono); font-size: var(--text-sm); }
+.sy-dim { color: var(--text-icon); }
+
+/* key-value grid inside cards */
+.sy-kv { display: grid; grid-template-columns: 150px 1fr; gap: 9px 16px; font-size: var(--text-base); padding: 14px 16px; margin: 0; }
+.sy-kv dt { color: var(--text-secondary); }
+.sy-kv dd { margin: 0; color: var(--text-primary); overflow-wrap: anywhere; min-width: 0; }
+
+/* stat tiles */
+.sy-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.sy-tile { background: var(--bg-raised); border-radius: 12px; box-shadow: inset 0 0 0 1px var(--gray-875); padding: 12px 14px; display: grid; gap: 6px; min-width: 0; }
+.sy-tile .k { font-size: var(--text-xs); color: var(--text-icon); }
+.sy-tile .v { font-size: var(--text-xl); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; letter-spacing: -.2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sy-tile .s { font-size: var(--text-xs); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sy-meter { height: 5px; border-radius: 3px; background: var(--gray-800); overflow: hidden; }
+.sy-meter i { display: block; height: 100%; border-radius: 3px; background: var(--text-secondary); transform-origin: left; animation: sygrow 700ms var(--spring-soft) both; }
+.sy-meter.bad i { background: var(--status-error); } .sy-meter.need i { background: var(--status-needs-you); }
+@keyframes sygrow { from { transform: scaleX(0); } }
+
+/* usage bars */
+.sy-chart { display: flex; align-items: flex-end; gap: 4px; height: 140px; padding: 16px 16px 0; }
+.sy-chart .col { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; gap: 0; position: relative; }
+.sy-chart .bar { border-radius: 3px 3px 1px 1px; background: var(--gray-600); transform-origin: bottom; animation: syrise 620ms var(--spring-soft) both; min-height: 2px; }
+.sy-chart .bar.out { background: var(--text-secondary); }
+.sy-chart .col:hover .bar { background: var(--gray-400); } .sy-chart .col:hover .bar.out { background: var(--text-primary); }
+@keyframes syrise { from { transform: scaleY(0); } }
+.sy-axis { display: flex; gap: 4px; padding: 6px 16px 12px; font-size: 11px; color: var(--text-icon); font-variant-numeric: tabular-nums; }
+.sy-axis span { flex: 1; min-width: 0; text-align: center; overflow: hidden; white-space: nowrap; }
+.sy-legend { display: flex; gap: 14px; font-size: var(--text-xs); color: var(--text-secondary); padding: 0 16px 12px; }
+.sy-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+.sy-hbar { height: 4px; border-radius: 2px; background: var(--gray-800); overflow: hidden; margin-top: 6px; }
+.sy-hbar i { display: block; height: 100%; background: var(--text-secondary); border-radius: 2px; transform-origin: left; animation: sygrow 640ms var(--spring-soft) both; }
+.sy-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border-card), var(--shadow-popover); border-radius: 8px; padding: 6px 9px; font-size: var(--text-xs); color: var(--text-secondary); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .12s; z-index: 2; }
+.sy-tip b { color: var(--text-primary); font-weight: var(--weight-medium); }
+.sy-chart .col:hover .sy-tip { opacity: 1; }
+
+/* run history */
+.sy-runs { display: grid; gap: 2px; }
+.sy-run { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 6px 10px; border-radius: 8px; font-size: var(--text-base); text-align: left; width: 100%; transition: background .12s; }
+.sy-run:hover { background: var(--bg-selected); }
+.sy-run .tt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); }
+.sy-run .tm { font-size: var(--text-xs); color: var(--text-icon); font-variant-numeric: tabular-nums; flex: none; }
+.sy-run .ic { color: var(--text-icon); }
+.sy-run-body { padding: 4px 10px 12px 34px; display: grid; gap: 8px; }
+
+/* QR code */
+.sy-qr { width: 196px; height: 196px; border-radius: 12px; background: #f4f4f4; padding: 10px; display: block; flex: none; }
+.sy-qr rect { fill: #111; }
+
+/* section header actions line up with the h2 */
+.ssec .act { display: flex; gap: 6px; align-items: center; }
+.sy-tools-r { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.sy-step { display: grid; gap: 4px; font-size: var(--text-base); color: var(--text-secondary); line-height: 21px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sy-meter i, .sy-chart .bar, .sy-hbar i, .sy-reveal { animation: fadein 120ms ease both !important; }
+}

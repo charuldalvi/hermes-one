@@ -1,0 +1,123 @@
+/* Skills, Plugins, Tools and Memory pages: the few parts pages.css doesn't have. Same tokens, colour
+   only for meaning (blue working, green done, amber needs you, red wrong), one white button per screen. */
+
+.shead .cap-acts { display: flex; align-items: center; gap: 8px; flex: none; padding-top: 2px; }
+.cap-dim { font-size: var(--text-base); color: var(--text-secondary); line-height: 20px; }
+.cap-sum { font-size: var(--text-sm); color: var(--text-icon); margin: -4px 0 14px; font-variant-numeric: tabular-nums; }
+.cap-danger .ml { color: var(--tint-red) !important; }
+.cap-link { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-sm); color: var(--text-secondary); padding: 2px 0; justify-self: start; }
+.cap-link:hover { color: var(--text-primary); }
+.cap-opt-l { font-size: var(--text-xs); color: var(--text-icon); }
+.cap-use { font-size: var(--text-xs); color: var(--text-icon); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cap-lock { color: var(--text-icon); display: inline-grid; }
+.srow:focus-visible, .cap-opt:focus-visible, .cap-toggle:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; border-radius: 10px; }
+
+/* a quiet note under a section, or inside a dialog */
+.cap-note { display: flex; align-items: flex-start; gap: 9px; font-size: var(--text-base); color: var(--text-secondary); line-height: 20px; padding: 10px 14px; border-radius: 10px; background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--gray-875); margin: 10px 0; }
+.cap-note .dot { margin-top: 7px; }
+.cap-note.need { background: rgba(245, 158, 11, .06); box-shadow: inset 0 0 0 1px rgba(245, 158, 11, .16); }
+.cap-note.bad { background: rgba(239, 68, 68, .06); box-shadow: inset 0 0 0 1px rgba(239, 68, 68, .16); }
+.cap-note code, .cap-code { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-primary); background: var(--bg-app); padding: 1px 6px; border-radius: 5px; overflow-wrap: anywhere; }
+
+/* loading rows */
+.cap-skel .srow { min-height: 62px; }
+.cap-skel i { display: block; height: 11px; border-radius: 6px; background: var(--gray-850); animation: capshim 1.4s ease-in-out infinite; }
+.cap-skel i.s { height: 9px; background: var(--gray-875); margin-top: 4px; }
+.cap-skel i.sw-s { width: 34px; height: 20px; border-radius: 10px; flex: none; }
+@keyframes capshim { 50% { opacity: .45; } }
+
+/* a running job */
+.cap-job { background: var(--bg-raised); border-radius: 12px; box-shadow: inset 0 0 0 1px var(--gray-875); padding: 6px 8px 6px 14px; margin-bottom: 14px; animation: flowin 420ms var(--spring-soft) both; }
+.cap-job .jl { display: flex; align-items: center; gap: 10px; min-height: 32px; }
+.cap-job .jt { flex: 1; min-width: 0; font-size: var(--text-base); color: var(--text-primary); }
+.cap-job .cap-log { margin: 4px 6px 8px 0; }
+.cap-log { margin: 8px 0 0; max-height: 220px; overflow: auto; font-family: var(--font-mono); font-size: var(--text-xs); line-height: 18px; color: var(--text-secondary); background: var(--bg-app); border-radius: 8px; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: inset 0 0 0 1px var(--gray-875); user-select: text; scrollbar-width: thin; scrollbar-color: var(--gray-850) transparent; }
+
+/* chips (tool names) */
+.cap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cap-chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 6px; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-secondary); background: var(--bg-app); box-shadow: inset 0 0 0 1px var(--gray-850); }
+.cap-chip em { font-style: normal; color: var(--text-icon); }
+
+/* dialog contents */
+.cap-dh { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cap-dh .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cap-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: var(--text-sm); color: var(--text-secondary); margin: 2px 0 14px; }
+.cap-meta > span + span::before { content: ''; display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: var(--gray-600); margin-right: 12px; vertical-align: middle; }
+.cap-desc { font-size: var(--text-md); color: var(--text-primary); line-height: 23px; margin: 0 0 14px; }
+.cap-h3 { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--text-secondary); margin: 18px 0 8px; display: flex; align-items: center; gap: 8px; }
+.cap-h3 .sp { flex: 1; }
+.cap-fm { display: grid; grid-template-columns: 120px 1fr; gap: 6px 14px; font-size: var(--text-sm); padding: 12px 14px; border-radius: 10px; background: var(--bg-app); box-shadow: inset 0 0 0 1px var(--gray-875); margin-bottom: 14px; }
+.cap-fm dt { color: var(--text-icon); font-family: var(--font-mono); font-size: var(--text-xs); line-height: 20px; }
+.cap-fm dd { margin: 0; color: var(--text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 20px; }
+.cap-md { font-size: var(--text-md); line-height: 24px; }
+.cap-md pre, .cap-md code { font-size: var(--text-sm); }
+.cap-md pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.cap-editor { width: 100%; min-height: 52vh; resize: vertical; font-family: var(--font-mono); font-size: var(--text-sm); line-height: 20px; tab-size: 2; }
+.cap-plain { font-size: var(--text-md); line-height: 24px; color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.cap-form { display: grid; gap: 12px; padding-top: 6px; }
+.cap-form label { display: grid; gap: 6px; font-size: var(--text-sm); color: var(--text-secondary); }
+.cap-form .hint { font-size: var(--text-xs); color: var(--text-icon); }
+.dlg .card .srow.ctlrow .ctl { width: min(300px, 50%); }
+
+/* choose-one rows (a provider, a backend, a model) */
+.cap-opts { display: grid; gap: 6px; }
+.cap-opt { width: 100%; text-align: left; display: grid; gap: 3px; padding: 10px 14px; border-radius: 10px; background: var(--bg-app); box-shadow: inset 0 0 0 1px var(--gray-875); transition: background .12s, box-shadow .15s; }
+.cap-opt:hover:not(:disabled) { background: var(--gray-900); }
+.cap-opt.on { box-shadow: inset 0 0 0 1px var(--gray-800); background: var(--gray-900); }
+.cap-opt .oh { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--text-md); color: var(--text-primary); }
+.cap-opt .oh > b { font-weight: var(--weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cap-opt .oh .sp { flex: 1; }
+.cap-opt .od { font-size: var(--text-sm); color: var(--text-secondary); line-height: 19px; }
+.cap-opt .ow { font-size: var(--text-sm); color: var(--tint-amber); line-height: 19px; }
+.cap-opt .om { font-size: var(--text-xs); color: var(--text-icon); display: flex; gap: 12px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+
+/* a provider that opens to show its keys and setup */
+.cap-prov { border-radius: 12px; background: var(--bg-app); box-shadow: inset 0 0 0 1px var(--gray-875); overflow: hidden; }
+.cap-prov + .cap-prov { margin-top: 6px; }
+.cap-prov > .ph { width: 100%; display: flex; align-items: center; gap: 8px; padding: 11px 14px; text-align: left; min-width: 0; transition: background .12s; }
+.cap-prov > .ph:hover { background: var(--gray-900); }
+.cap-prov > .ph b { font-weight: var(--weight-medium); font-size: var(--text-md); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cap-prov > .ph .sp { flex: 1; }
+.cap-prov > .ph > .ic:last-child { color: var(--text-icon); transition: transform 300ms var(--spring-soft); }
+.cap-prov.open > .ph > .ic:last-child { transform: rotate(180deg); }
+.cap-prov > .pb { padding: 2px 14px 14px; display: grid; gap: 10px; animation: flowin 320ms var(--spring-soft) both; }
+.cap-key { display: grid; gap: 8px; padding: 10px 12px; border-radius: 9px; background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--gray-850); }
+.cap-key .kh { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cap-key .kh .k { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-primary); }
+.cap-key .kh .sp { flex: 1; }
+.cap-key .kp { font-size: var(--text-sm); color: var(--text-secondary); }
+.cap-key .ke { display: flex; gap: 8px; align-items: center; }
+.cap-key .ke .answer { flex: 1; min-width: 0; }
+.cap-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* stat tiles (memory) */
+.cap-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.cap-stat { background: var(--bg-raised); border-radius: 12px; box-shadow: inset 0 0 0 1px var(--gray-875); padding: 12px 14px; display: grid; gap: 2px; }
+.cap-stat b { font-size: var(--text-xl); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
+.cap-stat span { font-size: var(--text-sm); color: var(--text-secondary); }
+
+/* a section that folds (built-in plugins) */
+.cap-toggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 16px; font-size: var(--text-base); color: var(--text-secondary); text-align: left; }
+.cap-toggle:hover { color: var(--text-primary); }
+.cap-toggle .ic { transition: transform 300ms var(--spring-soft); }
+.cap-toggle.open .ic { transform: rotate(90deg); }
+.cap-group { font-size: var(--text-xs); color: var(--text-icon); padding: 12px 16px 4px; box-shadow: inset 0 1px 0 var(--gray-875); }
+.card > .cap-group:first-child { box-shadow: none; }
+.cap-group + .srow { box-shadow: none !important; }
+
+/* memory items */
+.cap-src { font-size: var(--text-xs); color: var(--text-icon); white-space: nowrap; }
+.cap-links { display: grid; gap: 2px; }
+.cap-links button { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; text-align: left; font-size: var(--text-base); color: var(--text-primary); min-width: 0; }
+.cap-links button:hover { background: var(--bg-selected); }
+.cap-links button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cap-links button em { font-style: normal; font-size: var(--text-xs); color: var(--text-icon); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cap-skel i { animation: none; }
+  .cap-job, .cap-prov > .pb { animation: none; }
+}
+
+.srow.off .t1 > span:first-child { color: var(--text-secondary); }
+.cap-mem { color: var(--text-primary) !important; }
+.cap-meta > span.cap-row::before { content: none; }
