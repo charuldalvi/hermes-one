@@ -1,4 +1,4 @@
-// desktop-src/plugin.jsx
+// plugin.jsx
 import { Button, Codicon, GlyphSpinner, host, PALETTE_AREA, THEMES_AREA, useValue } from "@hermes/plugin-sdk";
 import { useEffect, useRef, useState } from "react";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";

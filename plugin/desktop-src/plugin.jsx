@@ -8,7 +8,7 @@
 //   wherever Hermes runs; the pane polls it for each change. The tab opens by itself when the agent in the chat you're looking
 //   at starts browsing, and stays shut for a while once you close it.
 //
-// Source of desktop/plugin.js: `npm run build` bundles this file (React and the SDK stay external).
+// Source of desktop/plugin.js: `npm run build` in this folder bundles this file (React and the SDK stay external).
 import { Button, Codicon, GlyphSpinner, host, PALETTE_AREA, THEMES_AREA, useValue } from '@hermes/plugin-sdk'
 import { useEffect, useRef, useState } from 'react'
 

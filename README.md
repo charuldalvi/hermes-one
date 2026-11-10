@@ -71,7 +71,7 @@ npm run package         # macOS: builds Hermes One.app into ~/Applications
 npm run package:win     # Windows zip with an installer
 ```
 
-**Plugin:** `plugin/desktop/plugin.js` is built from `plugin/desktop-src/` with `cd plugin && npm install && npm run build`. Check the whole plugin with `hermes plugins validate plugin`.
+**Plugin:** `plugin/desktop/plugin.js` is built from `plugin/desktop-src/` with `cd plugin/desktop-src && npm install && npm run build`. Check the whole plugin with `hermes plugins validate plugin`.
 
 **Releases:** pushing a tag like `v0.3.0` runs [the release workflow](.github/workflows/release.yml). It builds the Mac (Apple silicon and Intel) and Windows zips and attaches them to the release, where the installers find them.
 

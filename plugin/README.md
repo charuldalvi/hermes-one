@@ -46,6 +46,7 @@ Coming next: a page for the apps your agents build.
 `desktop/plugin.js` is built from `desktop-src/`:
 
 ```bash
+cd desktop-src
 npm install
 npm run build
 ```

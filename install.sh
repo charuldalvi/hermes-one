@@ -25,9 +25,10 @@ for arg in "$@"; do
   esac
 done
 
-say() { printf '\033[1m%s\033[0m\n' "$*"; }
+if [ -t 1 ]; then B='\033[1m' Y='\033[33m' R='\033[0m'; else B='' Y='' R=''; fi
+say() { printf "${B}%s${R}\n" "$*"; }
 note() { printf '  %s\n' "$*"; }
-warn() { printf '\033[33m  %s\033[0m\n' "$*"; }
+warn() { printf "${Y}  %s${R}\n" "$*"; }
 
 TMP="$(mktemp -d 2>/dev/null || mktemp -d -t hermes-one)"
 trap 'rm -rf "${TMP:?}"' EXIT
