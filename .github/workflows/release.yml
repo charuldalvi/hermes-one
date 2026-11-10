@@ -1,0 +1,61 @@
+# Builds the Hermes One app for Mac (Apple silicon and Intel) and Windows, and attaches the zips to a GitHub
+# release, under fixed names the installers download from releases/latest:
+#   Hermes-One-mac-arm64.zip, Hermes-One-mac-x64.zip, Hermes-One-win-x64.zip
+# Runs when a tag like v0.3.0 is pushed, or by hand (Actions -> Release -> Run workflow).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, like v0.3.0
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install
+        working-directory: app
+        run: npm ci
+
+      - name: Mac, Apple silicon
+        working-directory: app
+        run: |
+          npm run package -- --no-install
+          ditto -c -k --keepParent "release/Hermes One.app" "$RUNNER_TEMP/Hermes-One-mac-arm64.zip"
+
+      - name: Mac, Intel
+        working-directory: app
+        run: |
+          rm -rf node_modules/electron/dist node_modules/electron/path.txt "release/Hermes One.app"
+          (cd node_modules/electron && ELECTRON_INSTALL_ARCH=x64 node install.js)
+          node scripts/package.mjs --no-install
+          ditto -c -k --keepParent "release/Hermes One.app" "$RUNNER_TEMP/Hermes-One-mac-x64.zip"
+
+      - name: Windows
+        working-directory: app
+        run: |
+          node scripts/package-win.mjs --arch x64
+          cp release/Hermes-One-*-win32-x64.zip "$RUNNER_TEMP/Hermes-One-win-x64.zip"
+
+      - name: Publish the release
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Hermes One $TAG" --notes-file .github/release-notes.md
+          gh release upload "$TAG" "$RUNNER_TEMP"/Hermes-One-*.zip --clobber

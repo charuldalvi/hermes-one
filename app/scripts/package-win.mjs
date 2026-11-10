@@ -1,5 +1,5 @@
 // Builds Hermes One for Windows as a zip: release/Hermes-One-<version>-win32-<arch>.zip. It works on a Mac or on
-// Windows. Inside are the app folder, the Hermes plugin (../hermes-plugin/hermes-one) and "Install Hermes
+// Windows. Inside are the app folder, the Hermes plugin (../plugin) and "Install Hermes
 // One.cmd", which copies the app to %LOCALAPPDATA%\Programs\Hermes One, puts the plugin into every profile of
 // the Hermes on that PC and turns it on (`hermes plugins enable`), then opens the app (Hermes One adds its own
 // Start menu shortcut).
@@ -137,9 +137,9 @@ fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify({ name: pkg.n
 fs.cpSync(path.join(root, 'dist'), path.join(appDir, 'dist'), { recursive: true })
 fs.cpSync(path.join(root, 'dist-electron'), path.join(appDir, 'dist-electron'), { recursive: true })
 fs.copyFileSync(path.join(root, 'build/icon.ico'), path.join(res, 'hermes-one.ico'))
-const pluginSrc = path.resolve(root, '..', 'hermes-plugin', 'hermes-one')
+const pluginSrc = path.resolve(root, '..', 'plugin')
 if (!fs.existsSync(path.join(pluginSrc, 'plugin.yaml'))) throw new Error(`The Hermes plugin isn't at ${pluginSrc}`)
-fs.cpSync(pluginSrc, path.join(out, 'hermes-plugin', 'hermes-one'), { recursive: true, filter: (src) => !/(^|[\\/])(__pycache__|\.DS_Store)$/.test(src) })
+fs.cpSync(pluginSrc, path.join(out, 'hermes-plugin', 'hermes-one'), { recursive: true, filter: (src) => !/(^|[\\/])(__pycache__|\.DS_Store|node_modules)$/.test(src) })
 fs.writeFileSync(path.join(out, `Install ${NAME}.cmd`), INSTALL_CMD)
 fs.writeFileSync(path.join(out, 'install.ps1'), INSTALL_PS1.replace(/\n/g, '\r\n'))
 

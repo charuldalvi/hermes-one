@@ -1,24 +1,20 @@
 # Hermes One plugin
 
-A plugin for [Hermes Agent](https://github.com/NousResearch/hermes-agent) that turns your default agent into a lead who builds and runs a set of agents for you. It's the agent side of [Hermes One](https://github.com/charuldalvi/hermes-one), and works in Hermes on its own too.
+A plugin for [Hermes Agent](https://github.com/NousResearch/hermes-agent) that turns your default agent into a lead who builds and runs a set of agents for you. It's the agent side of [Hermes One](https://github.com/charuldalvi/hermes-one) (this repo's `plugin/` folder), and works in Hermes on its own too.
 
 It's a community project, not made by or affiliated with Nous Research.
 
 ## Install
 
-**In Hermes Desktop:** click
-[Install in Hermes](hermes://plugin/install?repo=charuldalvi/hermes-one-plugin&enable=1),
-review what it installs, and confirm. If the link doesn't open from here, paste this into your browser's address bar:
-`hermes://plugin/install?repo=charuldalvi/hermes-one-plugin&enable=1`
+The easiest way is the one-line installer in the [main README](../README.md#install). It installs this plugin into your Hermes and every agent's profile, switches it on, and adds the app if you want it.
 
-**From a terminal:**
+Plugin only, from a terminal:
 
 ```bash
-hermes plugins install charuldalvi/hermes-one-plugin
-hermes plugins enable hermes-one
+hermes plugins install charuldalvi/hermes-one#plugin --enable
 ```
 
-Then restart Hermes' gateway, which loads plugins when it starts. Install it in each agent's profile too, if you want those agents to build apps.
+Restart Hermes' gateway afterwards (`hermes gateway restart`), since it loads plugins when it starts. In Hermes Desktop you can also paste `hermes://plugin/install?repo=charuldalvi/hermes-one%23plugin&enable=1` into your browser's address bar.
 
 ## What your agents get
 
