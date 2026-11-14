@@ -66,11 +66,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .needcard.calm { color: var(--text-secondary); cursor: default; }
 .needcard .n { margin-left: auto; font-size: var(--text-base); color: var(--text-secondary); display: inline-block; }
 .ring { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(var(--status-needs-you) 0 var(--p, 40%), var(--gray-800) var(--p, 40%) 100%); -webkit-mask: radial-gradient(circle, transparent 5px, #000 5.5px); mask: radial-gradient(circle, transparent 5px, #000 5.5px); flex: none; }
-.conn { height: 52px; display: flex; align-items: center; gap: 12px; margin: 0 -13px; padding: 0 20px; box-shadow: inset 0 1px 0 var(--gray-900); font-size: var(--text-md); }
+/* The computer switcher: a rounded row inset like the sidebar's own rows (hover and selected the same),
+   under a hairline that spans the sidebar, as above the pinned pages. */
+.conn { position: relative; height: 40px; display: flex; align-items: center; gap: 12px; margin: 6px 0; padding: 0 8px; border-radius: var(--radius-md); font-size: var(--text-md); }
+.conn::before { content: ''; position: absolute; left: -13px; right: -13px; top: -6px; height: 1px; background: var(--gray-900); pointer-events: none; }
 .conn .tile { width: 22px; height: 22px; border-radius: 6px; background: var(--bg-selected); display: grid; place-items: center; }
 .conn .st { margin-left: auto; }
-button.conn { width: calc(100% + 26px); text-align: left; transition: background .15s; }
-button.conn:hover, button.conn.on { background: var(--bg-raised); }
+button.conn { width: 100%; text-align: left; transition: background .15s; }
+button.conn:hover { background: var(--bg-raised); }
+button.conn.on { background: var(--bg-selected); }
 .conn .gear { color: var(--text-icon); }
 button.conn:hover .gear, button.conn.on .gear { color: var(--text-primary); }
 

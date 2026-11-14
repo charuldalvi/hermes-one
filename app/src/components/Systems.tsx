@@ -31,13 +31,14 @@ export function SystemButton({ onSettings, settingsOn }: { onSettings: () => voi
   const name = active ? localWords(active.name) : localWords('This Mac')
   return (
     <>
-      <button ref={btn} className={`conn${settingsOn || open ? ' on' : ''}`} title="Switch systems" onClick={() => { reload(); setOpen((o) => !o) }}>
+      <button ref={btn} className={`conn${settingsOn || open ? ' on' : ''}`} title="Switch computer" onClick={() => { reload(); setOpen((o) => !o) }}>
         <span className="tile"><Icon name={iconOf(active)} size={14} /></span><span className="sysname">{name}</span>
-        <span className="st"><i className={`dot ${connection === 'open' ? 'ok' : connection === 'connecting' ? 'run' : 'bad'}`} />{connection === 'open' ? 'Connected' : connection === 'connecting' ? 'Connecting' : 'Offline'}</span>
+        {/* All well: just the green dot. Words only when something needs a look. */}
+        <span className="st" title={connection === 'open' ? 'Connected' : undefined}><i className={`dot ${connection === 'open' ? 'ok' : connection === 'connecting' ? 'run' : 'bad'}`} aria-label={connection === 'open' ? 'Connected' : undefined} />{connection === 'open' ? null : connection === 'connecting' ? 'Connecting…' : 'Offline'}</span>
         <Icon name="selector" size={15} className="gear" />
       </button>
       <Popover anchor={btn.current} open={open} onClose={() => setOpen(false)} side="above" width={300}>
-        <div className="mh">Systems</div>
+        <div className="mh">Computers</div>
         <div className="pop-list sys-list">
           {rows.map((s) => (
             <div key={s.id} className={`sys-row${s.active ? ' on' : ''}`}>
@@ -51,7 +52,7 @@ export function SystemButton({ onSettings, settingsOn }: { onSettings: () => voi
           ))}
         </div>
         <div className="pop-list sys-acts">
-          <button className="mi" onClick={() => { setOpen(false); setAdding(true) }}><Icon name="plus" size={15} /><span className="ml">Add a system…</span></button>
+          <button className="mi" onClick={() => { setOpen(false); setAdding(true) }}><Icon name="plus" size={15} /><span className="ml">Add a computer…</span></button>
           <button className="mi" onClick={() => { setOpen(false); onSettings() }}><Icon name="settings" size={15} /><span className="ml">Settings</span></button>
         </div>
       </Popover>
@@ -80,7 +81,7 @@ function AddSystem({ open, onClose }: { open: boolean; onClose: () => void }) {
   }
   const ready = kind === 'address' ? (pairing ? !!f.pairing.trim() : !!(f.url.trim() && f.user.trim() && f.password)) : !!f.host.trim()
   return (
-    <Dialog open={open} onClose={() => { if (!busy) onClose() }} title="Add a system" width={520}
+    <Dialog open={open} onClose={() => { if (!busy) onClose() }} title="Add a computer" width={520}
       footer={<><button className="b-text" onClick={onClose} disabled={busy}>Cancel</button><button className="b-pri" onClick={() => void connect()} disabled={!ready || busy}>{busy ? <><Spinner size={13} /> Connecting…</> : 'Connect'}</button></>}>
       <div className="sys-add">
         <Tabs items={[{ key: 'address', label: 'Tailscale or address' }, { key: 'ssh', label: 'SSH' }]} value={kind} onChange={(v) => { setKind(v); setError('') }} />
